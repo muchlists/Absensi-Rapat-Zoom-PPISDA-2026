@@ -13,7 +13,18 @@ export function getStoredMeetings(): Meeting[] {
     const data = localStorage.getItem(STORAGE_KEYS.MEETINGS);
     if (data) {
       const parsed = JSON.parse(data);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.map((m: Meeting) => {
+          if (!m.organizer || m.organizer.includes('(PPISDA)')) {
+            return {
+              ...m,
+              organizer:
+                'DIREKTORAT PELAKSANAAN PEMBIAYAAN INFRASTRUKTUR SUMBER DAYA AIR, DIREKTORAT JENDERAL PEMBIAYAAN INFRASTRUKTUR PEKERJAAN UMUM'
+            };
+          }
+          return m;
+        });
+      }
     }
   } catch (err) {
     console.error('Error loading meetings from storage', err);
@@ -68,7 +79,13 @@ export function getStoredSettings(): AdminSettings {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.SETTINGS);
     if (data) {
-      return { ...INITIAL_SETTINGS, ...JSON.parse(data) };
+      const parsed = JSON.parse(data);
+      const settings = { ...INITIAL_SETTINGS, ...parsed };
+      if (!settings.institutionName || settings.institutionName.includes('(PPISDA)')) {
+        settings.institutionName =
+          'DIREKTORAT PELAKSANAAN PEMBIAYAAN INFRASTRUKTUR SUMBER DAYA AIR, DIREKTORAT JENDERAL PEMBIAYAAN INFRASTRUKTUR PEKERJAAN UMUM';
+      }
+      return settings;
     }
   } catch (err) {
     console.error('Error loading settings from storage', err);

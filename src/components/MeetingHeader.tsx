@@ -6,6 +6,9 @@ interface MeetingHeaderProps {
   meeting: Meeting;
 }
 
+const DEFAULT_ORGANIZER =
+  'DIREKTORAT PELAKSANAAN PEMBIAYAAN INFRASTRUKTUR SUMBER DAYA AIR, DIREKTORAT JENDERAL PEMBIAYAAN INFRASTRUKTUR PEKERJAAN UMUM';
+
 export const MeetingHeader: React.FC<MeetingHeaderProps> = ({ meeting }) => {
   const formattedDate = new Date(meeting.date).toLocaleDateString('id-ID', {
     weekday: 'long',
@@ -14,28 +17,31 @@ export const MeetingHeader: React.FC<MeetingHeaderProps> = ({ meeting }) => {
     year: 'numeric'
   });
 
+  const organizerText =
+    !meeting.organizer || meeting.organizer.includes('(PPISDA)')
+      ? DEFAULT_ORGANIZER
+      : meeting.organizer;
+
   return (
     <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
-      {/* Top Banner Stripe - TOTAL HADIR IS EXPLICITLY HIDDEN HERE AS REQUESTED */}
-      <div className="bg-gradient-to-r from-blue-950 via-blue-900 to-indigo-950 px-4 py-4 sm:px-6 sm:py-5 text-white">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="space-y-1.5 max-w-3xl">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-amber-400 bg-amber-400/15 border border-amber-400/30 px-2.5 py-0.5 rounded-full">
-                {meeting.organizer || 'Direktorat Pelaksanaan Pembiayaan Infrastruktur Sumber Daya Air (PPISDA)'}
-              </span>
-            </div>
-
-            <h1 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-white text-balance">
-              {meeting.title}
-            </h1>
-
-            {meeting.agenda && (
-              <p className="text-xs sm:text-sm text-blue-100/90 leading-relaxed">
-                Agenda: {meeting.agenda}
-              </p>
-            )}
+      {/* Top Banner Stripe */}
+      <div className="bg-gradient-to-r from-blue-950 via-blue-900 to-indigo-950 px-4 py-4 sm:px-6 sm:py-5 md:px-8 md:py-6 text-white">
+        <div className="space-y-2.5 w-full">
+          <div>
+            <span className="inline-block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-amber-300 bg-amber-400/15 border border-amber-400/30 px-3 py-1 rounded-lg leading-relaxed max-w-full">
+              {organizerText}
+            </span>
           </div>
+
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-white leading-snug break-words">
+            {meeting.title}
+          </h1>
+
+          {meeting.agenda && (
+            <p className="text-xs sm:text-sm text-blue-100/90 leading-relaxed break-words">
+              <span className="font-semibold text-blue-200">Agenda:</span> {meeting.agenda}
+            </p>
+          )}
         </div>
       </div>
 

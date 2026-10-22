@@ -61,7 +61,7 @@ export const INITIAL_MEETINGS: Meeting[] = [
     timeEnd: '12:30',
     timezone: 'WIB',
     location: 'Ruang Rapat Utama Gd. Ditjen Pembiayaan Infrastruktur Lt. 2 / Hybrid Zoom',
-    organizer: 'Direktorat Pelaksanaan Pembiayaan Infrastruktur Sumber Daya Air (PPISDA)',
+    organizer: 'DIREKTORAT PELAKSANAAN PEMBIAYAAN INFRASTRUKTUR SUMBER DAYA AIR, DIREKTORAT JENDERAL PEMBIAYAAN INFRASTRUKTUR PEKERJAAN UMUM',
     leader: 'Dr. Ir. H. Bambang Priyono, M.Eng.',
     leaderNip: '19750812 200003 1 002',
     notetaker: 'Rina Kusuma Dewi, S.T., M.Sc.',
@@ -80,7 +80,7 @@ export const INITIAL_MEETINGS: Meeting[] = [
     timeEnd: '16:30',
     timezone: 'WIB',
     location: 'Auditorium Kementerian PUPR Jakarta (Tatap Muka Langsung)',
-    organizer: 'Direktorat Pelaksanaan Pembiayaan Infrastruktur Sumber Daya Air (PPISDA)',
+    organizer: 'DIREKTORAT PELAKSANAAN PEMBIAYAAN INFRASTRUKTUR SUMBER DAYA AIR, DIREKTORAT JENDERAL PEMBIAYAAN INFRASTRUKTUR PEKERJAAN UMUM',
     leader: 'Ir. Ahmad Zulkarnaen, M.T.',
     leaderNip: '19790315 200312 1 001',
     notetaker: 'Dimas Wicaksono, S.Kom.',
@@ -99,7 +99,7 @@ export const INITIAL_MEETINGS: Meeting[] = [
     timeEnd: '12:00',
     timezone: 'WIB',
     location: 'Zoom Cloud Meeting Dit. PPISDA (ID: 884-2190-3321)',
-    organizer: 'Direktorat Pelaksanaan Pembiayaan Infrastruktur Sumber Daya Air (PPISDA)',
+    organizer: 'DIREKTORAT PELAKSANAAN PEMBIAYAAN INFRASTRUKTUR SUMBER DAYA AIR, DIREKTORAT JENDERAL PEMBIAYAAN INFRASTRUKTUR PEKERJAAN UMUM',
     leader: 'Prof. Dr. Ir. Gunawan Wibisono, IPU',
     leaderNip: '19710419 199603 1 003',
     notetaker: 'Wahyu Nugroho, S.Si.',
@@ -113,7 +113,7 @@ export const INITIAL_MEETINGS: Meeting[] = [
 
 export const INITIAL_SETTINGS: AdminSettings = {
   adminPin: '102026',
-  institutionName: 'DIREKTORAT PELAKSANAAN PEMBIAYAAN INFRASTRUKTUR SUMBER DAYA AIR (PPISDA)',
+  institutionName: 'DIREKTORAT PELAKSANAAN PEMBIAYAAN INFRASTRUKTUR SUMBER DAYA AIR, DIREKTORAT JENDERAL PEMBIAYAAN INFRASTRUKTUR PEKERJAAN UMUM',
   subInstitution: 'Direktorat Jenderal Pembiayaan Infrastruktur Pekerjaan Umum dan Perumahan - Kementerian PUPR',
   address: 'Jl. Pattimura No. 20, Kebayoran Baru, Jakarta Selatan 12110 - Telp: (021) 72796155'
 };
