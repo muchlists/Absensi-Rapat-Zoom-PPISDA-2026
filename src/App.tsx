@@ -6,7 +6,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Lock,
-  ClipboardList
+  ClipboardList,
+  ClipboardCheck
 } from 'lucide-react';
 import { Meeting, AttendanceRecord, AdminSettings } from './types';
 import {
@@ -244,20 +245,20 @@ export default function App() {
       {/* FOOTER */}
       <footer className="no-print bg-white border-t border-slate-200 mt-12 py-6 text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <OfficialLogo size={24} />
+          <div className="flex items-center gap-2.5">
+            <div className="w-6 h-6 rounded-lg bg-blue-50 border border-blue-200/80 text-blue-800 flex items-center justify-center shrink-0">
+              <ClipboardCheck className="w-3.5 h-3.5" />
+            </div>
             <span>
               &copy; {new Date().getFullYear()} {settings.institutionName}. Hak cipta dilindungi.
             </span>
           </div>
 
-          <div className="flex items-center gap-4 text-[11px]">
-            <span>Daftar Hadir Resmi Ber-Tanda Tangan Digital</span>
-            <span>·</span>
+          <div className="flex items-center text-[11px]">
             <button
               type="button"
               onClick={handleOpenAdmin}
-              className="text-blue-800 hover:underline font-semibold"
+              className="text-slate-600 hover:text-blue-900 hover:underline font-medium transition-colors"
             >
               Area Admin & Ekspor
             </button>
