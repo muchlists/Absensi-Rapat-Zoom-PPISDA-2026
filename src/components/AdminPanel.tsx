@@ -27,6 +27,7 @@ import { exportAttendanceToCSV } from '../utils/csvGenerator';
 import { generateAttendancePDF } from '../utils/pdfGenerator';
 import { ParticipantDetailModal } from './ParticipantDetailModal';
 import { OfficialPrintView } from './OfficialPrintView';
+import { TimePicker24 } from './TimePicker24';
 
 interface AdminPanelProps {
   meetings: Meeting[];
@@ -1397,48 +1398,67 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-3">
-                <div className="sm:col-span-5 space-y-1">
-                  <label className="font-semibold text-slate-700">Tanggal *</label>
-                  <input
-                    type="date"
-                    required
-                    value={newDate}
-                    onChange={(e) => setNewDate(e.target.value)}
-                    className="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none"
-                  />
+              {/* Jadwal & Waktu Pelaksanaan */}
+              <div className="space-y-3 p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-slate-800 text-[11px] uppercase tracking-wider">
+                    Jadwal & Waktu Pelaksanaan
+                  </label>
+                  <span className="text-[11px] font-mono text-blue-900 font-bold bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md">
+                    {newTimeStart} - {newTimeEnd || 'Selesai'} {newTimezone}
+                  </span>
                 </div>
-                <div className="sm:col-span-7 grid grid-cols-3 gap-2">
-                  <div className="space-y-1">
-                    <label className="font-semibold text-slate-700">Mulai *</label>
+
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+                  <div className="sm:col-span-7 space-y-1">
+                    <label className="font-semibold text-slate-700 text-xs">Hari / Tanggal *</label>
                     <input
-                      type="time"
+                      type="date"
                       required
-                      value={newTimeStart}
-                      onChange={(e) => setNewTimeStart(e.target.value)}
-                      className="w-full px-1.5 sm:px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-mono text-center text-xs"
+                      value={newDate}
+                      onChange={(e) => setNewDate(e.target.value)}
+                      className="w-full px-3 py-1.5 rounded-xl border border-slate-300 bg-white focus:outline-none focus:border-blue-600 text-xs font-medium"
                     />
                   </div>
-                  <div className="space-y-1">
-                    <label className="font-semibold text-slate-700">Selesai</label>
-                    <input
-                      type="time"
-                      value={newTimeEnd}
-                      onChange={(e) => setNewTimeEnd(e.target.value)}
-                      className="w-full px-1.5 sm:px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-mono text-center text-xs"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="font-semibold text-slate-700">Zona Waktu</label>
+                  <div className="sm:col-span-5 space-y-1">
+                    <label className="font-semibold text-slate-700 text-xs">Zona Waktu *</label>
                     <select
                       value={newTimezone}
                       onChange={(e) => setNewTimezone(e.target.value as 'WIB' | 'WITA' | 'WIT')}
-                      className="w-full px-1.5 sm:px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-bold text-slate-800 text-center text-xs"
+                      className="w-full px-2 py-1.5 rounded-xl border border-slate-300 bg-white focus:outline-none focus:border-blue-600 text-xs font-bold text-slate-800 text-center"
                     >
-                      <option value="WIB">WIB</option>
-                      <option value="WITA">WITA</option>
-                      <option value="WIT">WIT</option>
+                      <option value="WIB">WIB (Barat)</option>
+                      <option value="WITA">WITA (Tengah)</option>
+                      <option value="WIT">WIT (Timur)</option>
                     </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-700 text-xs flex items-center justify-between">
+                      <span>Jam Mulai (24 Jam) *</span>
+                      <span className="font-mono text-blue-900 font-bold text-[11px]">{newTimeStart}</span>
+                    </label>
+                    <TimePicker24
+                      value={newTimeStart}
+                      onChange={setNewTimeStart}
+                      quickPresets={['08:30', '09:00', '10:00', '13:30', '14:00']}
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-700 text-xs flex items-center justify-between">
+                      <span>Jam Selesai (24 Jam)</span>
+                      <span className="font-mono text-slate-600 font-bold text-[11px]">{newTimeEnd || 'Selesai'}</span>
+                    </label>
+                    <TimePicker24
+                      value={newTimeEnd}
+                      onChange={setNewTimeEnd}
+                      allowEmpty
+                      emptyLabel="Sampai Selesai"
+                      quickPresets={['11:30', '12:00', '15:30', '16:30']}
+                    />
                   </div>
                 </div>
               </div>
@@ -1646,48 +1666,67 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-3">
-                <div className="sm:col-span-5 space-y-1">
-                  <label className="font-semibold text-slate-700">Tanggal *</label>
-                  <input
-                    type="date"
-                    required
-                    value={editingMeeting.date}
-                    onChange={(e) => setEditingMeeting({ ...editingMeeting, date: e.target.value })}
-                    className="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none"
-                  />
+              {/* Jadwal & Waktu Pelaksanaan */}
+              <div className="space-y-3 p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-slate-800 text-[11px] uppercase tracking-wider">
+                    Jadwal & Waktu Pelaksanaan
+                  </label>
+                  <span className="text-[11px] font-mono text-blue-900 font-bold bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md">
+                    {editingMeeting.timeStart} - {editingMeeting.timeEnd || 'Selesai'} {editingMeeting.timezone || 'WIB'}
+                  </span>
                 </div>
-                <div className="sm:col-span-7 grid grid-cols-3 gap-2">
-                  <div className="space-y-1">
-                    <label className="font-semibold text-slate-700">Mulai *</label>
+
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+                  <div className="sm:col-span-7 space-y-1">
+                    <label className="font-semibold text-slate-700 text-xs">Hari / Tanggal *</label>
                     <input
-                      type="time"
+                      type="date"
                       required
-                      value={editingMeeting.timeStart}
-                      onChange={(e) => setEditingMeeting({ ...editingMeeting, timeStart: e.target.value })}
-                      className="w-full px-1.5 sm:px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-mono text-center text-xs"
+                      value={editingMeeting.date}
+                      onChange={(e) => setEditingMeeting({ ...editingMeeting, date: e.target.value })}
+                      className="w-full px-3 py-1.5 rounded-xl border border-slate-300 bg-white focus:outline-none focus:border-blue-600 text-xs font-medium"
                     />
                   </div>
-                  <div className="space-y-1">
-                    <label className="font-semibold text-slate-700">Selesai</label>
-                    <input
-                      type="time"
-                      value={editingMeeting.timeEnd}
-                      onChange={(e) => setEditingMeeting({ ...editingMeeting, timeEnd: e.target.value })}
-                      className="w-full px-1.5 sm:px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-mono text-center text-xs"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="font-semibold text-slate-700">Zona Waktu</label>
+                  <div className="sm:col-span-5 space-y-1">
+                    <label className="font-semibold text-slate-700 text-xs">Zona Waktu *</label>
                     <select
                       value={editingMeeting.timezone || 'WIB'}
                       onChange={(e) => setEditingMeeting({ ...editingMeeting, timezone: e.target.value })}
-                      className="w-full px-1.5 sm:px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-bold text-slate-800 text-center text-xs"
+                      className="w-full px-2 py-1.5 rounded-xl border border-slate-300 bg-white focus:outline-none focus:border-blue-600 text-xs font-bold text-slate-800 text-center"
                     >
-                      <option value="WIB">WIB</option>
-                      <option value="WITA">WITA</option>
-                      <option value="WIT">WIT</option>
+                      <option value="WIB">WIB (Barat)</option>
+                      <option value="WITA">WITA (Tengah)</option>
+                      <option value="WIT">WIT (Timur)</option>
                     </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-700 text-xs flex items-center justify-between">
+                      <span>Jam Mulai (24 Jam) *</span>
+                      <span className="font-mono text-blue-900 font-bold text-[11px]">{editingMeeting.timeStart}</span>
+                    </label>
+                    <TimePicker24
+                      value={editingMeeting.timeStart}
+                      onChange={(val) => setEditingMeeting({ ...editingMeeting, timeStart: val })}
+                      quickPresets={['08:30', '09:00', '10:00', '13:30', '14:00']}
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-700 text-xs flex items-center justify-between">
+                      <span>Jam Selesai (24 Jam)</span>
+                      <span className="font-mono text-slate-600 font-bold text-[11px]">{editingMeeting.timeEnd || 'Selesai'}</span>
+                    </label>
+                    <TimePicker24
+                      value={editingMeeting.timeEnd}
+                      onChange={(val) => setEditingMeeting({ ...editingMeeting, timeEnd: val })}
+                      allowEmpty
+                      emptyLabel="Sampai Selesai"
+                      quickPresets={['11:30', '12:00', '15:30', '16:30']}
+                    />
                   </div>
                 </div>
               </div>
