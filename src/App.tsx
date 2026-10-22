@@ -19,7 +19,6 @@ import {
   saveStoredSettings,
   resetToDefaultData
 } from './utils/storage';
-import { OfficialLogo } from './components/OfficialLogo';
 import { MeetingHeader } from './components/MeetingHeader';
 import { AttendanceForm } from './components/AttendanceForm';
 import { SuccessModal } from './components/SuccessModal';
@@ -139,9 +138,11 @@ export default function App() {
       */}
       <header className="no-print sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-2xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-8">
-          {/* Zone 1: Single text element wordmark with official emblem */}
+          {/* Zone 1: Single text element wordmark with attendance icon */}
           <div className="flex items-center gap-3 shrink-0">
-            <OfficialLogo size={36} />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-950 via-blue-900 to-indigo-950 text-amber-400 flex items-center justify-center shadow-xs ring-1 ring-blue-700/40 shrink-0">
+              <ClipboardCheck className="w-5 h-5" />
+            </div>
             <a
               href="#top"
               onClick={(e) => {
@@ -241,30 +242,6 @@ export default function App() {
           />
         )}
       </main>
-
-      {/* FOOTER */}
-      <footer className="no-print bg-white border-t border-slate-200 mt-12 py-6 text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-6 h-6 rounded-lg bg-blue-50 border border-blue-200/80 text-blue-800 flex items-center justify-center shrink-0">
-              <ClipboardCheck className="w-3.5 h-3.5" />
-            </div>
-            <span>
-              &copy; {new Date().getFullYear()} {settings.institutionName}. Hak cipta dilindungi.
-            </span>
-          </div>
-
-          <div className="flex items-center text-[11px]">
-            <button
-              type="button"
-              onClick={handleOpenAdmin}
-              className="text-slate-600 hover:text-blue-900 hover:underline font-medium transition-colors"
-            >
-              Area Admin & Ekspor
-            </button>
-          </div>
-        </div>
-      </footer>
 
       {/* MODALS */}
       {/* 1. Success Attendance Confirmation Modal */}
