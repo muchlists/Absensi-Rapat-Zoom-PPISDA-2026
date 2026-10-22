@@ -206,26 +206,29 @@ export function generateAttendancePDF(
     doc.text(`• Jumlah Peserta ${subTitleTag} : ${sheetRecords.length} Orang`, marginX, signY + 4.5);
     doc.text(`• Status Tanda Tangan Lengkap : ${sheetRecords.filter(r => !!r.signature).length} Orang`, marginX, signY + 8.5);
 
-    // Sign-off block on the right
-    const signBlockX = pageWidth - marginX - 65;
-    const dateFormattedSign = new Date(meeting.date).toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
+    // Sign-off block on the right (jika showLeaderSignature aktif)
+    if (meeting.showLeaderSignature !== false) {
+      const signBlockX = pageWidth - marginX - 65;
+      const dateFormattedSign = new Date(meeting.date).toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+      const signLocationText = meeting.signLocation?.trim() || 'Lokasi Rapat';
 
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Lokasi Rapat, ${dateFormattedSign}`, signBlockX, signY);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Mengetahui / Mengesahkan,', signBlockX, signY + 4.5);
-    doc.text('Pimpinan Rapat,', signBlockX, signY + 8.5);
-
-    // Leader name
-    doc.setFont('helvetica', 'bold');
-    doc.text(meeting.leader, signBlockX, signY + 28);
-    if (meeting.leaderNip) {
       doc.setFont('helvetica', 'normal');
-      doc.text(`NIP. ${meeting.leaderNip}`, signBlockX, signY + 32);
+      doc.text(`${signLocationText}, ${dateFormattedSign}`, signBlockX, signY);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Mengetahui / Mengesahkan,', signBlockX, signY + 4.5);
+      doc.text('Pimpinan Rapat,', signBlockX, signY + 8.5);
+
+      // Leader name
+      doc.setFont('helvetica', 'bold');
+      doc.text(meeting.leader, signBlockX, signY + 28);
+      if (meeting.leaderNip) {
+        doc.setFont('helvetica', 'normal');
+        doc.text(`NIP. ${meeting.leaderNip}`, signBlockX, signY + 32);
+      }
     }
   };
 

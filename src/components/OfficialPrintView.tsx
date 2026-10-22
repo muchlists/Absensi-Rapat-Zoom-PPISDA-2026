@@ -184,20 +184,22 @@ export const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({
             </div>
           </div>
 
-          <div className="text-center sm:text-right w-full sm:w-64 space-y-1 self-end sm:self-auto">
-            <div>Lokasi Rapat, {formattedDate}</div>
-            <div className="font-bold">Mengetahui / Mengesahkan,</div>
-            <div className="font-bold">Pimpinan Rapat</div>
+          {meeting.showLeaderSignature !== false && (
+            <div className="text-center sm:text-right w-full sm:w-64 space-y-1 self-end sm:self-auto">
+              <div>{meeting.signLocation?.trim() || 'Lokasi Rapat'}, {formattedDate}</div>
+              <div className="font-bold">Mengetahui / Mengesahkan,</div>
+              <div className="font-bold">Pimpinan Rapat</div>
 
-            <div className="h-14 flex items-center justify-center sm:justify-end">
-              <span className="text-[10px] text-slate-300 italic">(Tanda Tangan & Cap)</span>
+              <div className="h-14 flex items-center justify-center sm:justify-end">
+                <span className="text-[10px] text-slate-300 italic">(Tanda Tangan & Cap)</span>
+              </div>
+
+              <div className="font-bold underline text-slate-900">{meeting.leader}</div>
+              {meeting.leaderNip && (
+                <div className="font-mono text-[11px] text-slate-500">NIP. {meeting.leaderNip}</div>
+              )}
             </div>
-
-            <div className="font-bold underline text-slate-900">{meeting.leader}</div>
-            {meeting.leaderNip && (
-              <div className="font-mono text-[11px] text-slate-500">NIP. {meeting.leaderNip}</div>
-            )}
-          </div>
+          )}
         </div>
       </div>
     );

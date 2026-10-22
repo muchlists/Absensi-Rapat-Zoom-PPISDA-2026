@@ -80,6 +80,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [newLeader, setNewLeader] = useState('Dr. Ir. H. Bambang Priyono, M.Eng.');
   const [newLeaderNip, setNewLeaderNip] = useState('19750812 200003 1 002');
   const [newAllowedMode, setNewAllowedMode] = useState<'hybrid' | 'luring_only' | 'daring_only'>('hybrid');
+  const [newShowLeaderSignature, setNewShowLeaderSignature] = useState(true);
+  const [newSignLocation, setNewSignLocation] = useState('Jakarta');
 
   // Edit Meeting State
   const [editingMeeting, setEditingMeeting] = useState<Meeting | null>(null);
@@ -269,6 +271,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       leader: newLeader.trim(),
       leaderNip: newLeaderNip.trim(),
       allowedAttendanceMode: newAllowedMode,
+      showLeaderSignature: newShowLeaderSignature,
+      signLocation: newSignLocation.trim() || 'Jakarta',
       isActive: true,
       createdAt: new Date().toISOString()
     };
@@ -1446,14 +1450,60 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-700">NIP Pimpinan</label>
+                  <label className="font-semibold text-slate-700 flex items-center justify-between">
+                    <span>NIP Pimpinan Rapat</span>
+                    <span className="font-normal text-slate-400 text-[11px]">(Opsional)</span>
+                  </label>
                   <input
                     type="text"
+                    placeholder="Contoh: 19750812 200003 1 002"
                     value={newLeaderNip}
                     onChange={(e) => setNewLeaderNip(e.target.value)}
                     className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-mono"
                   />
                 </div>
+              </div>
+
+              {/* Opsi Pengesahan Pimpinan Rapat & Lokasi */}
+              <div className="space-y-3 p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <label className="font-bold text-slate-800 block text-[11px] uppercase tracking-wider">
+                      Pengesahan Pimpinan Rapat
+                    </label>
+                    <p className="text-[11px] text-slate-500">
+                      Tampilkan tanda tangan & pengesahan "Mengetahui / Mengesahkan, Pimpinan Rapat" di berkas cetak/PDF
+                    </p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={newShowLeaderSignature}
+                      onChange={(e) => setNewShowLeaderSignature(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-900"></div>
+                  </label>
+                </div>
+
+                {newShowLeaderSignature && (
+                  <div className="pt-2 border-t border-slate-200/80 space-y-1">
+                    <label className="font-semibold text-slate-700 flex items-center justify-between">
+                      <span>Lokasi / Kota Pengesahan (di atas "Mengetahui / Mengesahkan")</span>
+                      <span className="font-normal text-slate-400 text-[11px]">Contoh: Jakarta</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Contoh: Jakarta / Lokasi Rapat"
+                      value={newSignLocation}
+                      onChange={(e) => setNewSignLocation(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white focus:outline-none focus:border-blue-600"
+                    />
+                    <p className="text-[11px] text-slate-500">
+                      Akan tercetak: <strong>{newSignLocation.trim() || 'Lokasi Rapat'}, {new Date(newDate || Date.now()).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</strong>
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Status / Format Kehadiran Setting Sebelum Rapat */}
@@ -1635,14 +1685,60 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-700">NIP Pimpinan</label>
+                  <label className="font-semibold text-slate-700 flex items-center justify-between">
+                    <span>NIP Pimpinan Rapat</span>
+                    <span className="font-normal text-slate-400 text-[11px]">(Opsional)</span>
+                  </label>
                   <input
                     type="text"
+                    placeholder="Contoh: 19750812 200003 1 002"
                     value={editingMeeting.leaderNip || ''}
                     onChange={(e) => setEditingMeeting({ ...editingMeeting, leaderNip: e.target.value })}
                     className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-mono"
                   />
                 </div>
+              </div>
+
+              {/* Opsi Pengesahan Pimpinan Rapat & Lokasi */}
+              <div className="space-y-3 p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <label className="font-bold text-slate-800 block text-[11px] uppercase tracking-wider">
+                      Pengesahan Pimpinan Rapat
+                    </label>
+                    <p className="text-[11px] text-slate-500">
+                      Tampilkan tanda tangan & pengesahan "Mengetahui / Mengesahkan, Pimpinan Rapat" di berkas cetak/PDF
+                    </p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={editingMeeting.showLeaderSignature !== false}
+                      onChange={(e) => setEditingMeeting({ ...editingMeeting, showLeaderSignature: e.target.checked })}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-900"></div>
+                  </label>
+                </div>
+
+                {editingMeeting.showLeaderSignature !== false && (
+                  <div className="pt-2 border-t border-slate-200/80 space-y-1">
+                    <label className="font-semibold text-slate-700 flex items-center justify-between">
+                      <span>Lokasi / Kota Pengesahan (di atas "Mengetahui / Mengesahkan")</span>
+                      <span className="font-normal text-slate-400 text-[11px]">Contoh: Jakarta</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Contoh: Jakarta / Lokasi Rapat"
+                      value={editingMeeting.signLocation || ''}
+                      onChange={(e) => setEditingMeeting({ ...editingMeeting, signLocation: e.target.value })}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white focus:outline-none focus:border-blue-600"
+                    />
+                    <p className="text-[11px] text-slate-500">
+                      Akan tercetak: <strong>{(editingMeeting.signLocation || '').trim() || 'Lokasi Rapat'}, {new Date(editingMeeting.date || Date.now()).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</strong>
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Status / Format Kehadiran Setting Sebelum Rapat */}

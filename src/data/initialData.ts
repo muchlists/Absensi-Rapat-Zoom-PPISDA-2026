@@ -65,6 +65,8 @@ export const INITIAL_MEETINGS: Meeting[] = [
     leaderNip: '19750812 200003 1 002',
     notetaker: 'Rina Kusuma Dewi, S.T., M.Sc.',
     allowedAttendanceMode: 'hybrid', // Bisa Luring atau Daring
+    showLeaderSignature: true,
+    signLocation: 'Jakarta',
     isActive: true,
     createdAt: '2026-10-20T08:00:00.000Z'
   },
@@ -81,6 +83,8 @@ export const INITIAL_MEETINGS: Meeting[] = [
     leaderNip: '19790315 200312 1 001',
     notetaker: 'Dimas Wicaksono, S.Kom.',
     allowedAttendanceMode: 'luring_only', // Khusus Luring Saja
+    showLeaderSignature: true,
+    signLocation: 'Jakarta',
     isActive: false,
     createdAt: '2026-10-18T10:00:00.000Z'
   },
@@ -97,6 +101,8 @@ export const INITIAL_MEETINGS: Meeting[] = [
     leaderNip: '19710419 199603 1 003',
     notetaker: 'Wahyu Nugroho, S.Si.',
     allowedAttendanceMode: 'daring_only', // Khusus Daring Saja
+    showLeaderSignature: true,
+    signLocation: 'Jakarta',
     isActive: false,
     createdAt: '2026-10-19T09:00:00.000Z'
   }

@@ -11,6 +11,8 @@ export interface Meeting {
   leaderNip?: string;
   notetaker?: string;
   allowedAttendanceMode?: 'hybrid' | 'luring_only' | 'daring_only'; // Luring saja, Daring saja, atau Keduanya
+  showLeaderSignature?: boolean; // Tampilkan pengesahan Pimpinan Rapat (on/off, default: true)
+  signLocation?: string; // Lokasi/Kota Pengesahan di atas Mengetahui / Mengesahkan (misal: "Jakarta")
   isActive: boolean;
   createdAt: string;
 }
