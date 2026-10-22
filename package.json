@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
-    "build": "node -e \"const fs=require('fs');fs.rmSync('dist',{recursive:true,force:true});\" && vite build && node -e \"const fs=require('fs');const p='dist/_redirects';if(fs.existsSync(p))fs.unlinkSync(p);\"",
+    "build": "node -e \"const fs=require('fs');fs.rmSync('dist',{recursive:true,force:true});\" && vite build",
     "preview": "npm run build && wrangler dev",
     "deploy": "npm run build && wrangler deploy",
     "clean": "rm -rf dist server.js",
