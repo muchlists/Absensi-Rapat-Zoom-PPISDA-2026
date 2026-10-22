@@ -1,18 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   User,
-  CreditCard,
   Building2,
   Briefcase,
   Phone,
   Mail,
   Send,
-  Radio,
   FileText,
-  AlertCircle,
-  MapPin,
-  Video,
-  Info
+  AlertCircle
 } from 'lucide-react';
 import { AttendanceRecord, AttendanceType, Meeting } from '../types';
 import { SignaturePad } from './SignaturePad';
@@ -29,32 +24,15 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
   const allowedMode = meeting.allowedAttendanceMode || 'hybrid';
 
   const [fullName, setFullName] = useState('');
-  const [nip, setNip] = useState('');
   const [institution, setInstitution] = useState('');
   const [position, setPosition] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  
-  // Set default attendanceType according to meeting configuration
-  const [attendanceType, setAttendanceType] = useState<AttendanceType>(() => {
-    if (allowedMode === 'daring_only') return 'daring';
-    return 'luring';
-  });
-
   const [signature, setSignature] = useState('');
   const [notes, setNotes] = useState('');
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Sync attendanceType if active meeting mode changes
-  useEffect(() => {
-    if (allowedMode === 'luring_only') {
-      setAttendanceType('luring');
-    } else if (allowedMode === 'daring_only') {
-      setAttendanceType('daring');
-    }
-  }, [allowedMode, meeting.id]);
 
   const validate = () => {
     const errs: { [key: string]: string } = {};
@@ -93,17 +71,13 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
     setIsSubmitting(true);
 
     const actualType: AttendanceType =
-      allowedMode === 'luring_only'
-        ? 'luring'
-        : allowedMode === 'daring_only'
-        ? 'daring'
-        : attendanceType;
+      allowedMode === 'daring_only' ? 'daring' : 'luring';
 
     const newRecord: AttendanceRecord = {
       id: `att-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       meetingId: meeting.id,
       fullName: fullName.trim(),
-      nip: nip.trim() || '-',
+      nip: '-',
       institution: institution.trim(),
       position: position.trim(),
       phone: phone.trim(),
@@ -120,7 +94,6 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
 
       // Reset form
       setFullName('');
-      setNip('');
       setInstitution('');
       setPosition('');
       setPhone('');
@@ -151,8 +124,8 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {/* Nama Lengkap */}
-        <div id="input-fullName" className="space-y-1.5">
+        {/* Nama Lengkap (Full Width) */}
+        <div id="input-fullName" className="space-y-1.5 md:col-span-2">
           <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
             <User className="w-3.5 h-3.5 text-blue-700" />
             Nama Lengkap (beserta Gelar) <span className="text-rose-500">*</span>
@@ -178,21 +151,6 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
               {errors.fullName}
             </p>
           )}
-        </div>
-
-        {/* NIP / NIK */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-            <CreditCard className="w-3.5 h-3.5 text-blue-700" />
-            NIP / NIK / No. Pegawai <span className="text-xs font-normal text-slate-500">(Opsional jika non-ASN)</span>
-          </label>
-          <input
-            type="text"
-            placeholder="Contoh: 19800512 200501 1 003"
-            value={nip}
-            onChange={(e) => setNip(e.target.value)}
-            className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 bg-slate-50/50 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all"
-          />
         </div>
 
         {/* Instansi */}
@@ -298,109 +256,7 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
         </div>
       </div>
 
-      {/* Jenis Kehadiran - DYNAMICALLY CONFIGURED BASED ON MEETING SETTING */}
-      <div className="space-y-2 pt-2">
-        <label className="text-xs font-semibold text-slate-700 flex items-center justify-between">
-          <span className="flex items-center gap-1.5">
-            <Radio className="w-3.5 h-3.5 text-blue-700" />
-            Metode / Status Kehadiran <span className="text-rose-500">*</span>
-          </span>
-          {allowedMode !== 'hybrid' && (
-            <span className="text-[11px] text-amber-700 font-medium bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-              Dikonfigurasi Penyelenggara: {allowedMode === 'luring_only' ? 'Hanya Luring' : 'Hanya Daring'}
-            </span>
-          )}
-        </label>
-
-        {allowedMode === 'hybrid' ? (
-          /* Opsi dua-duanya (Hybrid) */
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <label
-              className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
-                attendanceType === 'luring'
-                  ? 'bg-blue-50/70 border-blue-500 ring-1 ring-blue-400'
-                  : 'bg-white border-slate-200 hover:border-slate-300'
-              }`}
-            >
-              <input
-                type="radio"
-                name="attendanceType"
-                value="luring"
-                checked={attendanceType === 'luring'}
-                onChange={() => setAttendanceType('luring')}
-                className="mt-1 text-blue-600 focus:ring-blue-500"
-              />
-              <div>
-                <div className="text-sm font-semibold text-slate-900 flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-                  Hadir Langsung (Luring / Offline)
-                </div>
-                <div className="text-xs text-slate-500 mt-0.5">
-                  Hadir secara fisik di ruang rapat gedung kegiatan
-                </div>
-              </div>
-            </label>
-
-            <label
-              className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
-                attendanceType === 'daring'
-                  ? 'bg-blue-50/70 border-blue-500 ring-1 ring-blue-400'
-                  : 'bg-white border-slate-200 hover:border-slate-300'
-              }`}
-            >
-              <input
-                type="radio"
-                name="attendanceType"
-                value="daring"
-                checked={attendanceType === 'daring'}
-                onChange={() => setAttendanceType('daring')}
-                className="mt-1 text-blue-600 focus:ring-blue-500"
-              />
-              <div>
-                <div className="text-sm font-semibold text-slate-900 flex items-center gap-1.5">
-                  <Video className="w-3.5 h-3.5 text-sky-600" />
-                  Hadir Online (Daring / Virtual Zoom)
-                </div>
-                <div className="text-xs text-slate-500 mt-0.5">
-                  Mengikuti jalannya rapat via Zoom / Google Meet
-                </div>
-              </div>
-            </label>
-          </div>
-        ) : allowedMode === 'luring_only' ? (
-          /* Khusus Luring Saja */
-          <div className="p-3.5 rounded-xl bg-emerald-50/80 border border-emerald-300 text-emerald-900 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-emerald-100 text-emerald-700">
-              <MapPin className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="text-xs font-bold uppercase tracking-wider text-emerald-800">
-                Format Rapat: Tatap Muka Langsung (Luring Saja)
-              </div>
-              <p className="text-xs text-emerald-700 mt-0.5">
-                Rapat ini diselenggarakan secara tatap muka fisik. Presensi Anda akan dicatat langsung pada Berita Acara Daftar Hadir Luring di lokasi rapat ({meeting.location}).
-              </p>
-            </div>
-          </div>
-        ) : (
-          /* Khusus Daring Saja */
-          <div className="p-3.5 rounded-xl bg-sky-50/80 border border-sky-300 text-sky-900 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-sky-100 text-sky-700">
-              <Video className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="text-xs font-bold uppercase tracking-wider text-sky-800">
-                Format Rapat: Daring / Virtual Zoom Saja
-              </div>
-              <p className="text-xs text-sky-700 mt-0.5">
-                Rapat ini diselenggarakan sepenuhnya secara daring melalui Zoom Cloud Meeting / video conference. Presensi Anda otomatis dicatat pada Lembar Hadir Virtual Daring.
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Signature Pad */}
+      {/* Signature Pad (Paling lega & nyaman untuk tanda tangan) */}
       <div id="input-signature" className="pt-2">
         <SignaturePad
           value={signature}

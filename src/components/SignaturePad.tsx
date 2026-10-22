@@ -28,7 +28,7 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
     const dpr = window.devicePixelRatio || 1;
 
     const displayWidth = rect.width;
-    const displayHeight = 160;
+    const displayHeight = window.innerWidth < 640 ? 220 : 250;
 
     canvas.width = displayWidth * dpr;
     canvas.height = displayHeight * dpr;
@@ -39,7 +39,7 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
     if (ctx) {
       ctx.scale(dpr, dpr);
       ctx.strokeStyle = '#1e3a8a'; // Deep blue ink
-      ctx.lineWidth = 2.4;
+      ctx.lineWidth = 2.6;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
     }
@@ -186,7 +186,7 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
       </div>
 
       <div
-        className={`relative w-full rounded-xl border bg-white overflow-hidden shadow-xs touch-none ${
+        className={`relative w-full rounded-xl border bg-white overflow-hidden shadow-xs touch-none min-h-[220px] sm:min-h-[250px] ${
           error
             ? 'border-rose-400 ring-2 ring-rose-100'
             : hasDrawn
@@ -195,7 +195,7 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
         }`}
       >
         {/* Subtle document baseline marker */}
-        <div className="absolute inset-x-8 bottom-7 border-b border-dashed border-slate-200 pointer-events-none flex justify-between items-center text-[10px] text-slate-400">
+        <div className="absolute inset-x-8 bottom-9 border-b border-dashed border-slate-200 pointer-events-none flex justify-between items-center text-[10px] text-slate-400">
           <span>Garis tanda tangan</span>
           <span>Dit. PPISDA Presensi</span>
         </div>
