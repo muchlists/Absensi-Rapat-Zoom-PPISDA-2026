@@ -118,9 +118,6 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
             Dit. PPISDA
           </span>
         </div>
-        <p className="text-xs text-slate-500 mt-1">
-          Agenda: <strong>{meeting.title}</strong>
-        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -128,7 +125,7 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
         <div id="input-fullName" className="space-y-1.5 md:col-span-2">
           <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
             <User className="w-3.5 h-3.5 text-blue-700" />
-            Nama Lengkap (beserta Gelar) <span className="text-rose-500">*</span>
+            Nama Lengkap <span className="text-rose-500">*</span>
           </label>
           <input
             type="text"
