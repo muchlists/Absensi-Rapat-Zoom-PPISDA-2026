@@ -1225,9 +1225,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
       {/* MANUAL ADD PARTICIPANT MODAL */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-            <div className="bg-slate-900 px-6 py-4 text-white flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+          <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[90vh] my-auto">
+            <div className="bg-slate-900 px-5 sm:px-6 py-3.5 sm:py-4 text-white flex items-center justify-between shrink-0">
               <div>
                 <h4 className="text-sm font-bold">Tambah Presensi Peserta Manual</h4>
                 <p className="text-[11px] text-slate-400">
@@ -1237,13 +1237,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               <button
                 type="button"
                 onClick={() => setShowAddModal(false)}
-                className="text-slate-400 hover:text-white"
+                className="text-slate-400 hover:text-white p-1 rounded-lg transition-colors"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleManualAddSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleManualAddSubmit} className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1 overscroll-contain">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                 <div className="space-y-1">
                   <label className="font-semibold text-slate-700">Nama Lengkap *</label>
@@ -1263,7 +1263,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     value={manualNip}
                     onChange={(e) => setManualNip(e.target.value)}
                     placeholder="1985..."
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-mono"
                   />
                 </div>
                 <div className="space-y-1">
@@ -1294,7 +1294,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     value={manualPhone}
                     onChange={(e) => setManualPhone(e.target.value)}
                     placeholder="0812..."
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-mono"
                   />
                 </div>
                 <div className="space-y-1">
@@ -1311,7 +1311,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
               <div className="space-y-1 pt-1">
                 <label className="text-xs font-semibold text-slate-700">Metode Kehadiran</label>
-                <div className="flex gap-4 text-xs">
+                <div className="flex flex-wrap gap-4 text-xs">
                   <label className="flex items-center gap-1.5 cursor-pointer">
                     <input
                       type="radio"
@@ -1331,17 +1331,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 pt-3 border-t border-slate-200">
+              <div className="sticky bottom-0 -mx-4 -mb-4 sm:-mx-6 sm:-mb-6 p-4 sm:p-6 bg-white/95 backdrop-blur-xs border-t border-slate-200 flex items-center gap-2 pt-3 mt-4">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
+                  className="flex-1 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2 text-xs font-semibold text-white bg-blue-900 hover:bg-blue-800 rounded-xl shadow-xs"
+                  className="flex-1 py-2.5 text-xs font-semibold text-white bg-blue-900 hover:bg-blue-800 rounded-xl shadow-xs transition-colors"
                 >
                   Simpan Peserta
                 </button>
@@ -1353,9 +1353,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
       {/* CREATE NEW MEETING MODAL */}
       {showNewMeetingModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-            <div className="bg-slate-900 px-6 py-4 text-white flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+          <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[90vh] my-auto">
+            <div className="bg-slate-900 px-5 sm:px-6 py-3.5 sm:py-4 text-white flex items-center justify-between shrink-0">
               <div>
                 <h4 className="text-sm font-bold">Buat Agenda Rapat Baru</h4>
                 <p className="text-[11px] text-slate-400">
@@ -1365,13 +1365,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               <button
                 type="button"
                 onClick={() => setShowNewMeetingModal(false)}
-                className="text-slate-400 hover:text-white"
+                className="text-slate-400 hover:text-white p-1 rounded-lg transition-colors"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleCreateMeeting} className="p-6 space-y-3.5 text-xs">
+            <form onSubmit={handleCreateMeeting} className="p-4 sm:p-6 space-y-3.5 text-xs overflow-y-auto flex-1 overscroll-contain">
               <div className="space-y-1">
                 <label className="font-semibold text-slate-700">Judul / Topik Rapat *</label>
                 <input
@@ -1395,35 +1395,37 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-700">Tanggal</label>
+                  <label className="font-semibold text-slate-700">Tanggal *</label>
                   <input
                     type="date"
                     required
                     value={newDate}
                     onChange={(e) => setNewDate(e.target.value)}
-                    className="w-full px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none"
+                    className="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none"
                   />
                 </div>
-                <div className="space-y-1">
-                  <label className="font-semibold text-slate-700">Mulai (WIB)</label>
-                  <input
-                    type="time"
-                    required
-                    value={newTimeStart}
-                    onChange={(e) => setNewTimeStart(e.target.value)}
-                    className="w-full px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-mono"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="font-semibold text-slate-700">Selesai (WIB)</label>
-                  <input
-                    type="time"
-                    value={newTimeEnd}
-                    onChange={(e) => setNewTimeEnd(e.target.value)}
-                    className="w-full px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-mono"
-                  />
+                <div className="grid grid-cols-2 gap-2 sm:col-span-2">
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-700">Mulai (WIB) *</label>
+                    <input
+                      type="time"
+                      required
+                      value={newTimeStart}
+                      onChange={(e) => setNewTimeStart(e.target.value)}
+                      className="w-full px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-mono"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-700">Selesai (WIB)</label>
+                    <input
+                      type="time"
+                      value={newTimeEnd}
+                      onChange={(e) => setNewTimeEnd(e.target.value)}
+                      className="w-full px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-mono"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -1438,7 +1440,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="font-semibold text-slate-700">Pimpinan Rapat</label>
                   <input
@@ -1467,11 +1469,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               {/* Opsi Pengesahan Pimpinan Rapat & Lokasi */}
               <div className="space-y-3 p-3.5 rounded-xl bg-slate-50 border border-slate-200">
                 <div className="flex items-center justify-between gap-3">
-                  <div>
+                  <div className="min-w-0 pr-1">
                     <label className="font-bold text-slate-800 block text-[11px] uppercase tracking-wider">
                       Pengesahan Pimpinan Rapat
                     </label>
-                    <p className="text-[11px] text-slate-500">
+                    <p className="text-[11px] text-slate-500 leading-tight">
                       Tampilkan tanda tangan & pengesahan "Mengetahui / Mengesahkan, Pimpinan Rapat" di berkas cetak/PDF
                     </p>
                   </div>
@@ -1488,7 +1490,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                 {newShowLeaderSignature && (
                   <div className="pt-2 border-t border-slate-200/80 space-y-1">
-                    <label className="font-semibold text-slate-700 flex items-center justify-between">
+                    <label className="font-semibold text-slate-700 flex flex-wrap items-center justify-between gap-1">
                       <span>Lokasi / Kota Pengesahan (di atas "Mengetahui / Mengesahkan")</span>
                       <span className="font-normal text-slate-400 text-[11px]">Contoh: Jakarta</span>
                     </label>
@@ -1568,17 +1570,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 pt-3 border-t border-slate-200">
+              <div className="sticky bottom-0 -mx-4 -mb-4 sm:-mx-6 sm:-mb-6 p-4 sm:p-6 bg-white/95 backdrop-blur-xs border-t border-slate-200 flex items-center gap-2 pt-3 mt-4">
                 <button
                   type="button"
                   onClick={() => setShowNewMeetingModal(false)}
-                  className="flex-1 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
+                  className="flex-1 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2 text-xs font-semibold text-white bg-blue-900 hover:bg-blue-800 rounded-xl shadow-xs"
+                  className="flex-1 py-2.5 text-xs font-semibold text-white bg-blue-900 hover:bg-blue-800 rounded-xl shadow-xs transition-colors"
                 >
                   Simpan & Aktifkan Rapat
                 </button>
@@ -1590,9 +1592,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
       {/* EDIT EXISTING MEETING MODAL */}
       {editingMeeting && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-            <div className="bg-slate-900 px-6 py-4 text-white flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+          <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[90vh] my-auto">
+            <div className="bg-slate-900 px-5 sm:px-6 py-3.5 sm:py-4 text-white flex items-center justify-between shrink-0">
               <div>
                 <h4 className="text-sm font-bold">Edit Pengaturan Rapat & Format Absensi</h4>
                 <p className="text-[11px] text-slate-400">
@@ -1602,13 +1604,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               <button
                 type="button"
                 onClick={() => setEditingMeeting(null)}
-                className="text-slate-400 hover:text-white"
+                className="text-slate-400 hover:text-white p-1 rounded-lg transition-colors"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleSaveEditMeeting} className="p-6 space-y-3.5 text-xs">
+            <form onSubmit={handleSaveEditMeeting} className="p-4 sm:p-6 space-y-3.5 text-xs overflow-y-auto flex-1 overscroll-contain">
               <div className="space-y-1">
                 <label className="font-semibold text-slate-700">Judul / Topik Rapat *</label>
                 <input
@@ -1630,35 +1632,37 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-700">Tanggal</label>
+                  <label className="font-semibold text-slate-700">Tanggal *</label>
                   <input
                     type="date"
                     required
                     value={editingMeeting.date}
                     onChange={(e) => setEditingMeeting({ ...editingMeeting, date: e.target.value })}
-                    className="w-full px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none"
+                    className="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none"
                   />
                 </div>
-                <div className="space-y-1">
-                  <label className="font-semibold text-slate-700">Mulai (WIB)</label>
-                  <input
-                    type="time"
-                    required
-                    value={editingMeeting.timeStart}
-                    onChange={(e) => setEditingMeeting({ ...editingMeeting, timeStart: e.target.value })}
-                    className="w-full px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-mono"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="font-semibold text-slate-700">Selesai (WIB)</label>
-                  <input
-                    type="time"
-                    value={editingMeeting.timeEnd}
-                    onChange={(e) => setEditingMeeting({ ...editingMeeting, timeEnd: e.target.value })}
-                    className="w-full px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-mono"
-                  />
+                <div className="grid grid-cols-2 gap-2 sm:col-span-2">
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-700">Mulai (WIB) *</label>
+                    <input
+                      type="time"
+                      required
+                      value={editingMeeting.timeStart}
+                      onChange={(e) => setEditingMeeting({ ...editingMeeting, timeStart: e.target.value })}
+                      className="w-full px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-mono"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-700">Selesai (WIB)</label>
+                    <input
+                      type="time"
+                      value={editingMeeting.timeEnd}
+                      onChange={(e) => setEditingMeeting({ ...editingMeeting, timeEnd: e.target.value })}
+                      className="w-full px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-mono"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -1673,7 +1677,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="font-semibold text-slate-700">Pimpinan Rapat</label>
                   <input
@@ -1702,11 +1706,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               {/* Opsi Pengesahan Pimpinan Rapat & Lokasi */}
               <div className="space-y-3 p-3.5 rounded-xl bg-slate-50 border border-slate-200">
                 <div className="flex items-center justify-between gap-3">
-                  <div>
+                  <div className="min-w-0 pr-1">
                     <label className="font-bold text-slate-800 block text-[11px] uppercase tracking-wider">
                       Pengesahan Pimpinan Rapat
                     </label>
-                    <p className="text-[11px] text-slate-500">
+                    <p className="text-[11px] text-slate-500 leading-tight">
                       Tampilkan tanda tangan & pengesahan "Mengetahui / Mengesahkan, Pimpinan Rapat" di berkas cetak/PDF
                     </p>
                   </div>
@@ -1723,7 +1727,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                 {editingMeeting.showLeaderSignature !== false && (
                   <div className="pt-2 border-t border-slate-200/80 space-y-1">
-                    <label className="font-semibold text-slate-700 flex items-center justify-between">
+                    <label className="font-semibold text-slate-700 flex flex-wrap items-center justify-between gap-1">
                       <span>Lokasi / Kota Pengesahan (di atas "Mengetahui / Mengesahkan")</span>
                       <span className="font-normal text-slate-400 text-[11px]">Contoh: Jakarta</span>
                     </label>
@@ -1803,17 +1807,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 pt-3 border-t border-slate-200">
+              <div className="sticky bottom-0 -mx-4 -mb-4 sm:-mx-6 sm:-mb-6 p-4 sm:p-6 bg-white/95 backdrop-blur-xs border-t border-slate-200 flex items-center gap-2 pt-3 mt-4">
                 <button
                   type="button"
                   onClick={() => setEditingMeeting(null)}
-                  className="flex-1 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
+                  className="flex-1 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2 text-xs font-semibold text-white bg-blue-900 hover:bg-blue-800 rounded-xl shadow-xs"
+                  className="flex-1 py-2.5 text-xs font-semibold text-white bg-blue-900 hover:bg-blue-800 rounded-xl shadow-xs transition-colors"
                 >
                   Simpan Perubahan Rapat
                 </button>
