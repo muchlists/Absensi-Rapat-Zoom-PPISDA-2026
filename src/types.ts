@@ -5,6 +5,7 @@ export interface Meeting {
   date: string; // YYYY-MM-DD
   timeStart: string; // HH:mm
   timeEnd: string; // HH:mm
+  timezone?: 'WIB' | 'WITA' | 'WIT' | string; // Zona Waktu Indonesia (default: WIB)
   location: string;
   organizer: string;
   leader: string;

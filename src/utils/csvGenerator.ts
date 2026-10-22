@@ -38,7 +38,7 @@ export function exportAttendanceToCSV(
     `"DAFTAR HADIR RAPAT - ${categoryName}"`,
     `"AGENDA / TOPIK :","${meeting.title.replace(/"/g, '""')}"`,
     `"HARI / TANGGAL :","${formattedDate}"`,
-    `"WAKTU :","${meeting.timeStart} - ${meeting.timeEnd || 'Selesai'} WIB"`,
+    `"WAKTU :","${meeting.timeStart} - ${meeting.timeEnd || 'Selesai'} ${meeting.timezone || 'WIB'}"`,
     `"TEMPAT :","${meeting.location.replace(/"/g, '""')}"`,
     `"PENYELENGGARA :","${meeting.organizer.replace(/"/g, '""')}"`,
     `"PIMPINAN RAPAT :","${meeting.leader.replace(/"/g, '""')}"`,

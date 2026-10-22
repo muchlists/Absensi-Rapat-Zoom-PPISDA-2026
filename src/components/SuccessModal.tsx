@@ -92,7 +92,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
               <div className="flex items-center gap-2">
                 <Clock className="w-3.5 h-3.5 text-blue-700 shrink-0" />
                 <span className="text-slate-600 font-mono tabular-nums">
-                  {formattedDate}, {formattedTime} WIB
+                  {formattedDate}, {formattedTime} {meeting.timezone || 'WIB'}
                 </span>
               </div>
 

@@ -64,7 +64,7 @@ export const MeetingHeader: React.FC<MeetingHeaderProps> = ({ meeting }) => {
               Waktu Pelaksanaan
             </div>
             <div className="font-semibold text-slate-800 text-sm mt-0.5 font-mono tabular-nums">
-              {meeting.timeStart} - {meeting.timeEnd || 'Selesai'} WIB
+              {meeting.timeStart} - {meeting.timeEnd || 'Selesai'} {meeting.timezone || 'WIB'}
             </div>
           </div>
         </div>

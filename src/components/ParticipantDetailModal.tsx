@@ -105,7 +105,7 @@ export const ParticipantDetailModal: React.FC<ParticipantDetailModalProps> = ({
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-slate-500" />
               <span className="text-slate-600">Waktu Presensi:</span>
-              <strong className="font-mono">{formattedDate}, {formattedTime} WIB</strong>
+              <strong className="font-mono">{formattedDate}, {formattedTime} {meeting?.timezone || 'WIB'}</strong>
             </div>
 
             <div>

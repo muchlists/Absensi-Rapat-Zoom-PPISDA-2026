@@ -104,7 +104,7 @@ export const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({
             <span className="w-28 sm:w-32 font-semibold shrink-0">Waktu Pelaksanaan</span>
             <span className="w-3 shrink-0">:</span>
             <span className="flex-1 font-mono tabular-nums">
-              {meeting.timeStart} - {meeting.timeEnd || 'Selesai'} WIB
+              {meeting.timeStart} - {meeting.timeEnd || 'Selesai'} {meeting.timezone || 'WIB'}
             </span>
           </div>
           <div className="flex">

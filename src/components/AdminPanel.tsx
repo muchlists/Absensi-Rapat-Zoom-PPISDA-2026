@@ -75,6 +75,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [newDate, setNewDate] = useState(new Date().toISOString().split('T')[0]);
   const [newTimeStart, setNewTimeStart] = useState('09:00');
   const [newTimeEnd, setNewTimeEnd] = useState('12:00');
+  const [newTimezone, setNewTimezone] = useState<'WIB' | 'WITA' | 'WIT'>('WIB');
   const [newLocation, setNewLocation] = useState('Ruang Rapat Ditjen Pembiayaan Infrastruktur / Zoom');
   const [newOrganizer, setNewOrganizer] = useState(settings.institutionName);
   const [newLeader, setNewLeader] = useState('Dr. Ir. H. Bambang Priyono, M.Eng.');
@@ -266,6 +267,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       date: newDate,
       timeStart: newTimeStart,
       timeEnd: newTimeEnd,
+      timezone: newTimezone,
       location: newLocation.trim(),
       organizer: newOrganizer.trim(),
       leader: newLeader.trim(),
@@ -941,7 +943,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <p className="text-xs text-slate-600">{m.agenda}</p>
                       <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 pt-1">
                         <span>Tanggal: <strong className="text-slate-700">{m.date}</strong></span>
-                        <span>Waktu: <strong className="text-slate-700">{m.timeStart} - {m.timeEnd} WIB</strong></span>
+                        <span>Waktu: <strong className="text-slate-700">{m.timeStart} - {m.timeEnd || 'Selesai'} {m.timezone || 'WIB'}</strong></span>
                         <span>Lokasi: <strong className="text-slate-700">{m.location}</strong></span>
                         <span>Peserta: <strong className="font-mono text-blue-700">{count} Hadir</strong></span>
                       </div>
@@ -1196,7 +1198,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               <div className="text-xs font-semibold text-slate-800 bg-slate-100 p-2.5 rounded-xl border border-slate-200/80 text-left">
                 <div className="line-clamp-2">{deleteMeetingConfirm.title}</div>
                 <div className="text-[11px] font-normal text-slate-500 mt-1">
-                  Tanggal: {deleteMeetingConfirm.date} | Waktu: {deleteMeetingConfirm.timeStart} WIB
+                  Tanggal: {deleteMeetingConfirm.date} | Waktu: {deleteMeetingConfirm.timeStart} {deleteMeetingConfirm.timezone || 'WIB'}
                 </div>
               </div>
               <p className="text-xs text-rose-600 pt-1 text-left leading-relaxed bg-rose-50 p-2.5 rounded-xl border border-rose-200">
@@ -1395,8 +1397,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
-                <div className="space-y-1">
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-3">
+                <div className="sm:col-span-5 space-y-1">
                   <label className="font-semibold text-slate-700">Tanggal *</label>
                   <input
                     type="date"
@@ -1406,25 +1408,37 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     className="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-2 sm:col-span-2">
+                <div className="sm:col-span-7 grid grid-cols-3 gap-2">
                   <div className="space-y-1">
-                    <label className="font-semibold text-slate-700">Mulai (WIB) *</label>
+                    <label className="font-semibold text-slate-700">Mulai *</label>
                     <input
                       type="time"
                       required
                       value={newTimeStart}
                       onChange={(e) => setNewTimeStart(e.target.value)}
-                      className="w-full px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-mono"
+                      className="w-full px-1.5 sm:px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-mono text-center text-xs"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="font-semibold text-slate-700">Selesai (WIB)</label>
+                    <label className="font-semibold text-slate-700">Selesai</label>
                     <input
                       type="time"
                       value={newTimeEnd}
                       onChange={(e) => setNewTimeEnd(e.target.value)}
-                      className="w-full px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-mono"
+                      className="w-full px-1.5 sm:px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-mono text-center text-xs"
                     />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-700">Zona Waktu</label>
+                    <select
+                      value={newTimezone}
+                      onChange={(e) => setNewTimezone(e.target.value as 'WIB' | 'WITA' | 'WIT')}
+                      className="w-full px-1.5 sm:px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-bold text-slate-800 text-center text-xs"
+                    >
+                      <option value="WIB">WIB</option>
+                      <option value="WITA">WITA</option>
+                      <option value="WIT">WIT</option>
+                    </select>
                   </div>
                 </div>
               </div>
@@ -1632,8 +1646,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
-                <div className="space-y-1">
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-3">
+                <div className="sm:col-span-5 space-y-1">
                   <label className="font-semibold text-slate-700">Tanggal *</label>
                   <input
                     type="date"
@@ -1643,25 +1657,37 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     className="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-2 sm:col-span-2">
+                <div className="sm:col-span-7 grid grid-cols-3 gap-2">
                   <div className="space-y-1">
-                    <label className="font-semibold text-slate-700">Mulai (WIB) *</label>
+                    <label className="font-semibold text-slate-700">Mulai *</label>
                     <input
                       type="time"
                       required
                       value={editingMeeting.timeStart}
                       onChange={(e) => setEditingMeeting({ ...editingMeeting, timeStart: e.target.value })}
-                      className="w-full px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-mono"
+                      className="w-full px-1.5 sm:px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-mono text-center text-xs"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="font-semibold text-slate-700">Selesai (WIB)</label>
+                    <label className="font-semibold text-slate-700">Selesai</label>
                     <input
                       type="time"
                       value={editingMeeting.timeEnd}
                       onChange={(e) => setEditingMeeting({ ...editingMeeting, timeEnd: e.target.value })}
-                      className="w-full px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-mono"
+                      className="w-full px-1.5 sm:px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-mono text-center text-xs"
                     />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-700">Zona Waktu</label>
+                    <select
+                      value={editingMeeting.timezone || 'WIB'}
+                      onChange={(e) => setEditingMeeting({ ...editingMeeting, timezone: e.target.value })}
+                      className="w-full px-1.5 sm:px-2 py-1.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none font-bold text-slate-800 text-center text-xs"
+                    >
+                      <option value="WIB">WIB</option>
+                      <option value="WITA">WITA</option>
+                      <option value="WIT">WIT</option>
+                    </select>
                   </div>
                 </div>
               </div>

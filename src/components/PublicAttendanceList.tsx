@@ -133,7 +133,7 @@ export const PublicAttendanceList: React.FC<PublicAttendanceListProps> = ({ reco
                       <td className="py-2.5 px-4 text-center font-mono text-slate-600 tabular-nums">
                         <span className="inline-flex items-center gap-1">
                           <Clock className="w-3 h-3 text-slate-400" />
-                          {timeString} WIB
+                          {timeString} {meeting?.timezone || 'WIB'}
                         </span>
                       </td>
                       <td className="py-2.5 px-4 text-center">

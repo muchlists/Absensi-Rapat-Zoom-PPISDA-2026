@@ -69,7 +69,7 @@ export function generateAttendancePDF(
     doc.setFont('helvetica', 'bold');
     doc.text('Waktu', col1X, infoY);
     doc.setFont('helvetica', 'normal');
-    doc.text(`: ${meeting.timeStart} - ${meeting.timeEnd || 'Selesai'} WIB`, col1ValX, infoY);
+    doc.text(`: ${meeting.timeStart} - ${meeting.timeEnd || 'Selesai'} ${meeting.timezone || 'WIB'}`, col1ValX, infoY);
 
     // Right column
     let rightInfoY = 22;
