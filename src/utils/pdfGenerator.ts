@@ -56,25 +56,25 @@ export function generateAttendancePDF(
     autoTable(doc, {
       body: [
         [
-          { content: 'Agenda / Topik', styles: { fontStyle: 'bold', cellWidth: 28 } },
-          { content: `: ${meeting.title}`, styles: { cellWidth: 106 } },
-          { content: 'Tempat / Ruang', styles: { fontStyle: 'bold', cellWidth: 28 } },
-          { content: `: ${meeting.location}`, styles: { cellWidth: 107 } }
+          { content: 'Agenda / Topik :', styles: { fontStyle: 'bold', cellWidth: 34 } },
+          { content: meeting.title, styles: { cellWidth: 100.5 } },
+          { content: 'Tempat / Ruang :', styles: { fontStyle: 'bold', cellWidth: 34 } },
+          { content: meeting.location, styles: { cellWidth: 100.5 } }
         ],
         [
-          { content: 'Hari / Tanggal', styles: { fontStyle: 'bold', cellWidth: 28 } },
-          { content: `: ${formattedDate}`, styles: { cellWidth: 106 } },
-          { content: 'Penyelenggara', styles: { fontStyle: 'bold', cellWidth: 28 } },
-          { content: `: ${formatOrganizerName(meeting.organizer)}`, styles: { cellWidth: 107 } }
+          { content: 'Hari / Tanggal :', styles: { fontStyle: 'bold', cellWidth: 34 } },
+          { content: formattedDate, styles: { cellWidth: 100.5 } },
+          { content: 'Penyelenggara :', styles: { fontStyle: 'bold', cellWidth: 34 } },
+          { content: formatOrganizerName(meeting.organizer), styles: { cellWidth: 100.5 } }
         ],
         [
-          { content: 'Waktu Pelaksanaan', styles: { fontStyle: 'bold', cellWidth: 28 } },
+          { content: 'Waktu Pelaksanaan :', styles: { fontStyle: 'bold', cellWidth: 34 } },
           {
-            content: `: ${meeting.timeStart} - ${meeting.timeEnd || 'Selesai'} ${meeting.timezone || 'WIB'}`,
-            styles: { cellWidth: 106 }
+            content: `${meeting.timeStart} - ${meeting.timeEnd || 'Selesai'} ${meeting.timezone || 'WIB'}`,
+            styles: { cellWidth: 100.5 }
           },
-          { content: 'Pimpinan Rapat', styles: { fontStyle: 'bold', cellWidth: 28 } },
-          { content: `: ${meeting.leader}`, styles: { cellWidth: 107 } }
+          { content: 'Pimpinan Rapat :', styles: { fontStyle: 'bold', cellWidth: 34 } },
+          { content: meeting.leader, styles: { cellWidth: 100.5 } }
         ]
       ],
       startY: 22,

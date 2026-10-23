@@ -82,35 +82,29 @@ export const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({
         {/* DETAIL RAPAT */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1.5 text-xs text-slate-800 mb-5 bg-slate-50/70 p-3 sm:p-4 rounded-xl border border-slate-200/80">
           <div className="flex">
-            <span className="w-28 sm:w-32 font-semibold shrink-0">Agenda / Topik</span>
-            <span className="w-3 shrink-0">:</span>
+            <span className="w-32 sm:w-36 font-semibold shrink-0">Agenda / Topik :</span>
             <span className="flex-1 font-medium">{meeting.title}</span>
           </div>
           <div className="flex">
-            <span className="w-28 sm:w-32 font-semibold shrink-0">Tempat / Ruang</span>
-            <span className="w-3 shrink-0">:</span>
+            <span className="w-32 sm:w-36 font-semibold shrink-0">Tempat / Ruang :</span>
             <span className="flex-1 font-medium">{meeting.location}</span>
           </div>
           <div className="flex">
-            <span className="w-28 sm:w-32 font-semibold shrink-0">Hari / Tanggal</span>
-            <span className="w-3 shrink-0">:</span>
+            <span className="w-32 sm:w-36 font-semibold shrink-0">Hari / Tanggal :</span>
             <span className="flex-1 font-medium">{formattedDate}</span>
           </div>
           <div className="flex">
-            <span className="w-28 sm:w-32 font-semibold shrink-0">Penyelenggara</span>
-            <span className="w-3 shrink-0">:</span>
+            <span className="w-32 sm:w-36 font-semibold shrink-0">Penyelenggara :</span>
             <span className="flex-1 font-medium">{formatOrganizerName(meeting.organizer)}</span>
           </div>
           <div className="flex">
-            <span className="w-28 sm:w-32 font-semibold shrink-0">Waktu Pelaksanaan</span>
-            <span className="w-3 shrink-0">:</span>
+            <span className="w-32 sm:w-36 font-semibold shrink-0">Waktu Pelaksanaan :</span>
             <span className="flex-1 font-mono tabular-nums">
               {meeting.timeStart} - {meeting.timeEnd || 'Selesai'} {meeting.timezone || 'WIB'}
             </span>
           </div>
           <div className="flex">
-            <span className="w-28 sm:w-32 font-semibold shrink-0">Pimpinan Rapat</span>
-            <span className="w-3 shrink-0">:</span>
+            <span className="w-32 sm:w-36 font-semibold shrink-0">Pimpinan Rapat :</span>
             <span className="flex-1 font-medium">{meeting.leader}</span>
           </div>
         </div>
