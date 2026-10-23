@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Printer, Download, Video, MapPin, Layers } from 'lucide-react';
 import { AttendanceRecord, Meeting, AdminSettings } from '../types';
 import { generateAttendancePDF, PdfExportMode } from '../utils/pdfGenerator';
+import { formatOrganizerName } from '../utils/textUtils';
 
 interface OfficialPrintViewProps {
   meeting: Meeting;
@@ -98,7 +99,7 @@ export const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({
           <div className="flex">
             <span className="w-28 sm:w-32 font-semibold shrink-0">Penyelenggara</span>
             <span className="w-3 shrink-0">:</span>
-            <span className="flex-1 font-medium">{meeting.organizer}</span>
+            <span className="flex-1 font-medium">{formatOrganizerName(meeting.organizer)}</span>
           </div>
           <div className="flex">
             <span className="w-28 sm:w-32 font-semibold shrink-0">Waktu Pelaksanaan</span>
@@ -125,7 +126,7 @@ export const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({
                 <th className="py-2.5 px-3 border-r border-slate-300 text-left">Jabatan</th>
                 <th className="py-2.5 px-3 border-r border-slate-300 w-28 text-center">No. HP</th>
                 <th className="py-2.5 px-3 border-r border-slate-300 text-left">E-mail</th>
-                <th className="py-2.5 px-3 w-36 text-center">Tanda Tangan</th>
+                <th className="py-2.5 px-3 w-44 text-center">Tanda Tangan</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-300">
@@ -155,13 +156,13 @@ export const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({
                     <td className="py-2 px-3 border-r border-slate-300 text-slate-600 font-mono text-[11px]">
                       {rec.email || '-'}
                     </td>
-                    <td className="py-1 px-2 text-center h-14 w-36 align-middle">
+                    <td className="py-1 px-2 text-center h-20 w-44 align-middle">
                       {rec.signature ? (
-                        <div className="flex items-center justify-center h-full">
+                        <div className="flex items-center justify-center h-full w-full">
                           <img
                             src={rec.signature}
                             alt="TTD"
-                            className="max-h-12 max-w-full object-contain"
+                            className="max-h-[68px] h-16 w-auto max-w-[155px] object-contain mx-auto"
                           />
                         </div>
                       ) : (

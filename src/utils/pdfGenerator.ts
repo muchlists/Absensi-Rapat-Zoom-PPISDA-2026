@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { AttendanceRecord, Meeting, AdminSettings } from '../types';
+import { formatOrganizerName } from './textUtils';
 
 export type PdfExportMode = 'separate_sheets' | 'luring_only' | 'daring_only' | 'combined';
 
@@ -64,7 +65,7 @@ export function generateAttendancePDF(
           { content: 'Hari / Tanggal', styles: { fontStyle: 'bold', cellWidth: 28 } },
           { content: `: ${formattedDate}`, styles: { cellWidth: 106 } },
           { content: 'Penyelenggara', styles: { fontStyle: 'bold', cellWidth: 28 } },
-          { content: `: ${meeting.organizer}`, styles: { cellWidth: 107 } }
+          { content: `: ${formatOrganizerName(meeting.organizer)}`, styles: { cellWidth: 107 } }
         ],
         [
           { content: 'Waktu Pelaksanaan', styles: { fontStyle: 'bold', cellWidth: 28 } },
@@ -139,7 +140,7 @@ export function generateAttendancePDF(
         textColor: [30, 41, 59],
         lineColor: [180, 190, 205],
         lineWidth: 0.2,
-        minCellHeight: 14,
+        minCellHeight: 18,
         valign: 'middle'
       },
       headStyles: {
@@ -152,23 +153,48 @@ export function generateAttendancePDF(
       },
       columnStyles: {
         0: { cellWidth: 10, halign: 'center' },
-        1: { cellWidth: 52 },
-        2: { cellWidth: 48 },
+        1: { cellWidth: 50 },
+        2: { cellWidth: 47 },
         3: { cellWidth: 38 },
         4: { cellWidth: 28, halign: 'center' },
         5: { cellWidth: 48 },
-        6: { cellWidth: 45, halign: 'center', minCellHeight: 15 }
+        6: { cellWidth: 48, halign: 'center', minCellHeight: 18 }
       },
       didDrawCell: (data) => {
         if (data.column.index === 6 && data.section === 'body') {
           const record = sheetRecords[data.row.index];
           if (record && record.signature && record.signature.startsWith('data:image')) {
             try {
-              const padX = data.cell.x + 2;
+              const padX = data.cell.x + 1.5;
               const padY = data.cell.y + 1;
-              const padW = data.cell.width - 4;
+              const padW = data.cell.width - 3;
               const padH = data.cell.height - 2;
-              doc.addImage(record.signature, 'PNG', padX, padY, padW, padH, undefined, 'FAST');
+
+              let renderW = padW;
+              let renderH = padH;
+              let renderX = padX;
+              let renderY = padY;
+
+              try {
+                const imgProps = doc.getImageProperties(record.signature);
+                if (imgProps.width && imgProps.height) {
+                  const imgRatio = imgProps.width / imgProps.height;
+                  const boxRatio = padW / padH;
+                  if (imgRatio > boxRatio) {
+                    renderW = padW;
+                    renderH = padW / imgRatio;
+                    renderY = padY + (padH - renderH) / 2;
+                  } else {
+                    renderH = padH;
+                    renderW = padH * imgRatio;
+                    renderX = padX + (padW - renderW) / 2;
+                  }
+                }
+              } catch {
+                // Keep default full padded bounding box if properties cannot be determined
+              }
+
+              doc.addImage(record.signature, 'PNG', renderX, renderY, renderW, renderH, undefined, 'FAST');
             } catch (e) {
               doc.setFontSize(7);
               doc.setTextColor(120, 120, 120);

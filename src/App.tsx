@@ -167,7 +167,7 @@ export default function App() {
       timeStart: '09:00',
       timeEnd: '12:00',
       location: 'Ruang Rapat Utama Gd. Ditjen Pembiayaan Infrastruktur / Zoom',
-      organizer: 'Direktorat Pelaksanaan Pembiayaan Infrastruktur Sumber Daya Air, DIREKTORAT JENDERAL PEMBIAYAAN INFRASTRUKTUR PEKERJAAN UMUM',
+      organizer: 'Direktorat Pelaksanaan Pembiayaan Infrastruktur Sumber Daya Air, Direktorat Jenderal Pembiayaan Infrastruktur Pekerjaan Umum',
       leader: 'Pimpinan Rapat',
       isActive: true,
       createdAt: new Date().toISOString()

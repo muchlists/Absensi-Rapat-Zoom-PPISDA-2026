@@ -1,4 +1,5 @@
 import { AttendanceRecord, Meeting } from '../types';
+import { formatOrganizerName } from './textUtils';
 
 export function exportAttendanceToCSV(
   meeting: Meeting,
@@ -40,7 +41,7 @@ export function exportAttendanceToCSV(
     `"HARI / TANGGAL :","${formattedDate}"`,
     `"WAKTU :","${meeting.timeStart} - ${meeting.timeEnd || 'Selesai'} ${meeting.timezone || 'WIB'}"`,
     `"TEMPAT :","${meeting.location.replace(/"/g, '""')}"`,
-    `"PENYELENGGARA :","${meeting.organizer.replace(/"/g, '""')}"`,
+    `"PENYELENGGARA :","${formatOrganizerName(meeting.organizer).replace(/"/g, '""')}"`,
     `"PIMPINAN RAPAT :","${meeting.leader.replace(/"/g, '""')}"`,
     `""`
   ];

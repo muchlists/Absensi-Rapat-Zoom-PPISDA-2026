@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { RotateCcw, CheckCircle2, AlertCircle, PenLine } from 'lucide-react';
+import { trimCanvasWhitespace } from '../utils/textUtils';
 
 interface SignaturePadProps {
   value: string;
@@ -17,12 +18,15 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasDrawn, setHasDrawn] = useState(false);
   const lastPointRef = useRef<{ x: number; y: number } | null>(null);
+  const isUserDrawingRef = useRef(false);
 
   // Initialize or resize canvas with high DPI sharpness
   const setupCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
+
+    if (isUserDrawingRef.current) return;
 
     const rect = container.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
@@ -45,7 +49,7 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
     }
 
     // If there is existing value, draw it
-    if (value) {
+    if (value && !isUserDrawingRef.current) {
       const img = new Image();
       img.onload = () => {
         if (ctx) {
@@ -54,6 +58,13 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
         }
       };
       img.src = value;
+    }
+  }, [value]);
+
+  useEffect(() => {
+    if (!value) {
+      isUserDrawingRef.current = false;
+      setHasDrawn(false);
     }
   }, [value]);
 
@@ -94,6 +105,7 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
     e.preventDefault();
     const coords = getCoordinates(e);
     setIsDrawing(true);
+    isUserDrawingRef.current = true;
     lastPointRef.current = coords;
 
     const canvas = canvasRef.current;
@@ -138,9 +150,9 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Emit PNG data URL
-    const dataUrl = canvas.toDataURL('image/png');
-    onChange(dataUrl);
+    // Emit trimmed PNG data URL without excessive outer whitespace
+    const trimmedDataUrl = trimCanvasWhitespace(canvas);
+    onChange(trimmedDataUrl);
     setHasDrawn(true);
   };
 
@@ -152,6 +164,7 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
 
     const dpr = window.devicePixelRatio || 1;
     ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+    isUserDrawingRef.current = false;
     onChange('');
     setHasDrawn(false);
   };

@@ -1,6 +1,7 @@
 import { Meeting, AttendanceRecord, AdminSettings } from '../types';
+import { trimCanvasWhitespace } from '../utils/textUtils';
 
-// Helper to generate a realistic SVG signature data URL
+// Helper to generate a realistic signature data URL with trimmed margins
 export function createMockSignatureSvg(name: string, variant: number = 1): string {
   const canvas = document.createElement('canvas');
   canvas.width = 320;
@@ -48,7 +49,7 @@ export function createMockSignatureSvg(name: string, variant: number = 1): strin
   }
   ctx.stroke();
 
-  return canvas.toDataURL('image/png');
+  return trimCanvasWhitespace(canvas);
 }
 
 export const INITIAL_MEETINGS: Meeting[] = [
@@ -61,7 +62,7 @@ export const INITIAL_MEETINGS: Meeting[] = [
     timeEnd: '12:30',
     timezone: 'WIB',
     location: 'Ruang Rapat Utama Gd. Ditjen Pembiayaan Infrastruktur Lt. 2 / Hybrid Zoom',
-    organizer: 'DIREKTORAT PELAKSANAAN PEMBIAYAAN INFRASTRUKTUR SUMBER DAYA AIR, DIREKTORAT JENDERAL PEMBIAYAAN INFRASTRUKTUR PEKERJAAN UMUM',
+    organizer: 'Direktorat Pelaksanaan Pembiayaan Infrastruktur Sumber Daya Air, Direktorat Jenderal Pembiayaan Infrastruktur Pekerjaan Umum',
     leader: 'Dr. Ir. H. Bambang Priyono, M.Eng.',
     leaderNip: '19750812 200003 1 002',
     notetaker: 'Rina Kusuma Dewi, S.T., M.Sc.',
@@ -80,7 +81,7 @@ export const INITIAL_MEETINGS: Meeting[] = [
     timeEnd: '16:30',
     timezone: 'WIB',
     location: 'Auditorium Kementerian PUPR Jakarta (Tatap Muka Langsung)',
-    organizer: 'DIREKTORAT PELAKSANAAN PEMBIAYAAN INFRASTRUKTUR SUMBER DAYA AIR, DIREKTORAT JENDERAL PEMBIAYAAN INFRASTRUKTUR PEKERJAAN UMUM',
+    organizer: 'Direktorat Pelaksanaan Pembiayaan Infrastruktur Sumber Daya Air, Direktorat Jenderal Pembiayaan Infrastruktur Pekerjaan Umum',
     leader: 'Ir. Ahmad Zulkarnaen, M.T.',
     leaderNip: '19790315 200312 1 001',
     notetaker: 'Dimas Wicaksono, S.Kom.',
@@ -99,7 +100,7 @@ export const INITIAL_MEETINGS: Meeting[] = [
     timeEnd: '12:00',
     timezone: 'WIB',
     location: 'Zoom Cloud Meeting Dit. PPISDA (ID: 884-2190-3321)',
-    organizer: 'DIREKTORAT PELAKSANAAN PEMBIAYAAN INFRASTRUKTUR SUMBER DAYA AIR, DIREKTORAT JENDERAL PEMBIAYAAN INFRASTRUKTUR PEKERJAAN UMUM',
+    organizer: 'Direktorat Pelaksanaan Pembiayaan Infrastruktur Sumber Daya Air, Direktorat Jenderal Pembiayaan Infrastruktur Pekerjaan Umum',
     leader: 'Prof. Dr. Ir. Gunawan Wibisono, IPU',
     leaderNip: '19710419 199603 1 003',
     notetaker: 'Wahyu Nugroho, S.Si.',
@@ -113,7 +114,7 @@ export const INITIAL_MEETINGS: Meeting[] = [
 
 export const INITIAL_SETTINGS: AdminSettings = {
   adminPin: '102026',
-  institutionName: 'DIREKTORAT PELAKSANAAN PEMBIAYAAN INFRASTRUKTUR SUMBER DAYA AIR, DIREKTORAT JENDERAL PEMBIAYAAN INFRASTRUKTUR PEKERJAAN UMUM',
+  institutionName: 'Direktorat Pelaksanaan Pembiayaan Infrastruktur Sumber Daya Air, Direktorat Jenderal Pembiayaan Infrastruktur Pekerjaan Umum',
   subInstitution: 'Direktorat Jenderal Pembiayaan Infrastruktur Pekerjaan Umum dan Perumahan - Kementerian PUPR',
   address: 'Jl. Pattimura No. 20, Kebayoran Baru, Jakarta Selatan 12110 - Telp: (021) 72796155'
 };

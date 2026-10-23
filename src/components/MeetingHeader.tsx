@@ -1,13 +1,11 @@
 import React from 'react';
 import { Calendar, Clock, MapPin, User } from 'lucide-react';
 import { Meeting } from '../types';
+import { formatOrganizerName } from '../utils/textUtils';
 
 interface MeetingHeaderProps {
   meeting: Meeting;
 }
-
-const DEFAULT_ORGANIZER =
-  'DIREKTORAT PELAKSANAAN PEMBIAYAAN INFRASTRUKTUR SUMBER DAYA AIR, DIREKTORAT JENDERAL PEMBIAYAAN INFRASTRUKTUR PEKERJAAN UMUM';
 
 export const MeetingHeader: React.FC<MeetingHeaderProps> = ({ meeting }) => {
   const formattedDate = new Date(meeting.date).toLocaleDateString('id-ID', {
@@ -17,10 +15,7 @@ export const MeetingHeader: React.FC<MeetingHeaderProps> = ({ meeting }) => {
     year: 'numeric'
   });
 
-  const organizerText =
-    !meeting.organizer || meeting.organizer.includes('(PPISDA)')
-      ? DEFAULT_ORGANIZER
-      : meeting.organizer;
+  const organizerText = formatOrganizerName(meeting.organizer);
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
@@ -28,7 +23,7 @@ export const MeetingHeader: React.FC<MeetingHeaderProps> = ({ meeting }) => {
       <div className="bg-gradient-to-r from-blue-950 via-blue-900 to-indigo-950 px-4 py-4 sm:px-6 sm:py-5 md:px-8 md:py-6 text-white">
         <div className="space-y-2.5 w-full">
           <div>
-            <span className="inline-block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-amber-300 bg-amber-400/15 border border-amber-400/30 px-3 py-1 rounded-lg leading-relaxed max-w-full">
+            <span className="inline-block text-[10px] sm:text-[11px] font-bold tracking-wide text-amber-300 bg-amber-400/15 border border-amber-400/30 px-3 py-1 rounded-lg leading-relaxed max-w-full">
               {organizerText}
             </span>
           </div>

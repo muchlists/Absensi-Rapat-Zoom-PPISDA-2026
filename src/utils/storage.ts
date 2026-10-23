@@ -1,5 +1,6 @@
 import { Meeting, AttendanceRecord, AdminSettings } from '../types';
 import { INITIAL_MEETINGS, INITIAL_ATTENDANCE, INITIAL_SETTINGS, createMockSignatureSvg } from '../data/initialData';
+import { formatOrganizerName, OFFICIAL_ORGANIZER_TITLE_CASE } from './textUtils';
 import {
   saveMeetingsToCloud,
   saveAttendanceToCloud,
@@ -21,16 +22,10 @@ export function getStoredMeetings(): Meeting[] {
     if (data) {
       const parsed = JSON.parse(data);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed.map((m: Meeting) => {
-          if (!m.organizer || m.organizer.includes('(PPISDA)')) {
-            return {
-              ...m,
-              organizer:
-                'DIREKTORAT PELAKSANAAN PEMBIAYAAN INFRASTRUKTUR SUMBER DAYA AIR, DIREKTORAT JENDERAL PEMBIAYAAN INFRASTRUKTUR PEKERJAAN UMUM'
-            };
-          }
-          return m;
-        });
+        return parsed.map((m: Meeting) => ({
+          ...m,
+          organizer: formatOrganizerName(m.organizer)
+        }));
       }
     }
   } catch (err) {
@@ -98,10 +93,7 @@ export function getStoredSettings(): AdminSettings {
     if (data) {
       const parsed = JSON.parse(data);
       const settings = { ...INITIAL_SETTINGS, ...parsed };
-      if (!settings.institutionName || settings.institutionName.includes('(PPISDA)')) {
-        settings.institutionName =
-          'DIREKTORAT PELAKSANAAN PEMBIAYAAN INFRASTRUKTUR SUMBER DAYA AIR, DIREKTORAT JENDERAL PEMBIAYAAN INFRASTRUKTUR PEKERJAAN UMUM';
-      }
+      settings.institutionName = formatOrganizerName(settings.institutionName);
       return settings;
     }
   } catch (err) {
