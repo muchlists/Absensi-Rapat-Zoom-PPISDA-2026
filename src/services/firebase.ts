@@ -1,79 +1,35 @@
-import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
+import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import {
   getDatabase,
   ref,
   onValue,
   set,
-  get,
   Database,
   Unsubscribe
 } from 'firebase/database';
 import { Meeting, AttendanceRecord, AdminSettings, FirebaseConfig } from '../types';
 
-const CONFIG_STORAGE_KEY = 'ppisda_firebase_config_v1';
+// Built-in hardcoded Firebase Database URL (configured directly in code)
+export const BUILTIN_FIREBASE_DB_URL = 'https://absensi-ppisda-default-rtdb.asia-southeast1.firebasedatabase.app';
 
-// Default config from environment variable if configured during build/deployment
+// Allow optional override via environment variable if needed
 const ENV_DB_URL = (import.meta.env.VITE_FIREBASE_DATABASE_URL as string | undefined)?.trim();
-const ENV_PROJECT_ID = (import.meta.env.VITE_FIREBASE_PROJECT_ID as string | undefined)?.trim();
-const ENV_API_KEY = (import.meta.env.VITE_FIREBASE_API_KEY as string | undefined)?.trim();
 
-export function getStoredFirebaseConfig(): FirebaseConfig | null {
-  try {
-    // 1. Check localStorage first
-    const saved = localStorage.getItem(CONFIG_STORAGE_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (parsed && parsed.databaseURL) {
-        return {
-          ...parsed,
-          databaseURL: sanitizeDatabaseUrl(parsed.databaseURL)
-        };
-      }
-    }
-
-    // 2. Fallback to environment variables
-    if (ENV_DB_URL) {
-      return {
-        databaseURL: sanitizeDatabaseUrl(ENV_DB_URL),
-        projectId: ENV_PROJECT_ID || extractProjectIdFromUrl(ENV_DB_URL),
-        apiKey: ENV_API_KEY || 'fake-api-key-for-rtdb'
-      };
-    }
-  } catch (err) {
-    console.error('Error reading stored Firebase config', err);
-  }
-  return null;
+export function getStoredFirebaseConfig(): FirebaseConfig {
+  const dbUrl = ENV_DB_URL || BUILTIN_FIREBASE_DB_URL;
+  return {
+    databaseURL: sanitizeDatabaseUrl(dbUrl),
+    projectId: extractProjectIdFromUrl(dbUrl),
+    apiKey: 'ppisda-rtdb-key'
+  };
 }
 
-export function saveStoredFirebaseConfig(config: FirebaseConfig | null): void {
-  try {
-    if (!config || !config.databaseURL) {
-      localStorage.removeItem(CONFIG_STORAGE_KEY);
-      activeApp = null;
-      activeDb = null;
-      return;
-    }
-
-    const sanitized: FirebaseConfig = {
-      ...config,
-      databaseURL: sanitizeDatabaseUrl(config.databaseURL),
-      projectId: config.projectId || extractProjectIdFromUrl(config.databaseURL),
-      apiKey: config.apiKey || 'anon-key-rtdb'
-    };
-
-    localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(sanitized));
-    // Reset cached instances to force re-init with new config
-    activeApp = null;
-    activeDb = null;
-    initFirebase(sanitized);
-  } catch (err) {
-    console.error('Error saving Firebase config', err);
-  }
+export function saveStoredFirebaseConfig(_config: FirebaseConfig | null): void {
+  // Built-in config is permanently embedded in code; no manual config required
 }
 
 function sanitizeDatabaseUrl(url: string): string {
   let cleaned = url.trim();
-  // Remove trailing slashes and /ppisda or .json suffix if user accidentally typed it
   cleaned = cleaned.replace(/\/+$/, '');
   cleaned = cleaned.replace(/\/(ppisda|data)?(\.json)?$/, '');
   return cleaned;
@@ -88,17 +44,14 @@ function extractProjectIdFromUrl(url: string): string {
   } catch {
     // ignore
   }
-  return 'ppisda-absensi';
+  return 'absensi-ppisda';
 }
 
 let activeApp: FirebaseApp | null = null;
 let activeDb: Database | null = null;
 
-export function initFirebase(customConfig?: FirebaseConfig | null): Database | null {
-  const config = customConfig || getStoredFirebaseConfig();
-  if (!config || !config.databaseURL) {
-    return null;
-  }
+export function initFirebase(_customConfig?: FirebaseConfig | null): Database | null {
+  const config = getStoredFirebaseConfig();
 
   try {
     const appName = 'ppisda-firebase-app';
@@ -112,7 +65,7 @@ export function initFirebase(customConfig?: FirebaseConfig | null): Database | n
         {
           databaseURL: sanitizeDatabaseUrl(config.databaseURL),
           projectId: config.projectId || extractProjectIdFromUrl(config.databaseURL),
-          apiKey: config.apiKey || 'anon-rtdb-key'
+          apiKey: config.apiKey || 'ppisda-rtdb-key'
         },
         appName
       );
@@ -127,8 +80,7 @@ export function initFirebase(customConfig?: FirebaseConfig | null): Database | n
 }
 
 export function isFirebaseConfigured(): boolean {
-  const config = getStoredFirebaseConfig();
-  return Boolean(config && config.databaseURL);
+  return true;
 }
 
 export async function testFirebaseConnection(config: FirebaseConfig): Promise<{ success: boolean; message: string }> {
