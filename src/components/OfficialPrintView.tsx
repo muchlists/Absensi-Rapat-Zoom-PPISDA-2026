@@ -124,13 +124,14 @@ export const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({
                 <th className="py-2.5 px-3 border-r border-slate-300 text-left">Instansi / Unit Kerja</th>
                 <th className="py-2.5 px-3 border-r border-slate-300 text-left">Jabatan</th>
                 <th className="py-2.5 px-3 border-r border-slate-300 w-28 text-center">No. HP</th>
+                <th className="py-2.5 px-3 border-r border-slate-300 text-left">E-mail</th>
                 <th className="py-2.5 px-3 w-36 text-center">Tanda Tangan</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-300">
               {data.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-slate-400 italic">
+                  <td colSpan={7} className="py-8 text-center text-slate-400 italic">
                     Belum ada peserta yang terdaftar pada kategori presensi ini.
                   </td>
                 </tr>
@@ -150,6 +151,9 @@ export const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({
                     <td className="py-2 px-3 border-r border-slate-300">{rec.position}</td>
                     <td className="py-2 px-3 text-center border-r border-slate-300 font-mono text-[11px]">
                       {rec.phone}
+                    </td>
+                    <td className="py-2 px-3 border-r border-slate-300 text-slate-600 font-mono text-[11px]">
+                      {rec.email || '-'}
                     </td>
                     <td className="py-1 px-2 text-center h-14 w-36 align-middle">
                       {rec.signature ? (
@@ -177,10 +181,6 @@ export const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({
             <div className="font-bold text-slate-900 text-xs">Rekapitulasi:</div>
             <div>
               • Jumlah Peserta Terdaftar : <strong className="font-mono">{data.length}</strong> Orang
-            </div>
-            <div>
-              • Tanda Tangan Terisi :{' '}
-              <strong className="font-mono">{data.filter((r) => !!r.signature).length}</strong> Orang
             </div>
           </div>
 

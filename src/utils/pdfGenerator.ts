@@ -28,7 +28,7 @@ export function generateAttendancePDF(
     year: 'numeric'
   });
 
-  // Helper to render one full attendance sheet (Kop + Meta + Table + Signatures)
+  // Helper to render one full attendance sheet matching OfficialPrintView exactly
   const renderSingleSheet = (
     sheetRecords: AttendanceRecord[],
     subTitleTag: string,
@@ -39,76 +39,78 @@ export function generateAttendancePDF(
       doc.addPage();
     }
 
-    // --- TITLE OF DOCUMENT (TANPA KOP SURAT) ---
+    // --- 1. TITLE OF DOCUMENT (Matching OfficialPrintView) ---
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(13);
+    doc.setFontSize(13.5);
     doc.setTextColor(15, 23, 42);
-    doc.text(`DAFTAR HADIR RAPAT - ${subTitleTag.toUpperCase()}`, pageWidth / 2, 16, { align: 'center' });
+    doc.text('DAFTAR HADIR RAPAT', pageWidth / 2, 13, { align: 'center' });
 
-    // --- MEETING DETAILS BLOCK ---
-    doc.setFontSize(8.5);
-    const col1X = marginX + 2;
-    const col1ValX = marginX + 34;
-    const col2X = pageWidth / 2 + 5;
-    const col2ValX = pageWidth / 2 + 37;
-    let infoY = 22;
-
-    // Left column
+    // Subtitle Category Badge
     doc.setFont('helvetica', 'bold');
-    doc.text('Agenda / Topik', col1X, infoY);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`: ${meeting.title}`, col1ValX, infoY);
+    doc.setFontSize(9);
+    doc.setTextColor(30, 58, 138); // Blue
+    doc.text(`[ ${subTitleTag.toUpperCase()} ]`, pageWidth / 2, 18, { align: 'center' });
 
-    infoY += 4.5;
-    doc.setFont('helvetica', 'bold');
-    doc.text('Hari / Tanggal', col1X, infoY);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`: ${formattedDate}`, col1ValX, infoY);
+    // --- 2. MEETING DETAILS BLOCK (Rendered as structured autoTable to prevent text overlap) ---
+    autoTable(doc, {
+      body: [
+        [
+          { content: 'Agenda / Topik', styles: { fontStyle: 'bold', cellWidth: 28 } },
+          { content: `: ${meeting.title}`, styles: { cellWidth: 106 } },
+          { content: 'Tempat / Ruang', styles: { fontStyle: 'bold', cellWidth: 28 } },
+          { content: `: ${meeting.location}`, styles: { cellWidth: 107 } }
+        ],
+        [
+          { content: 'Hari / Tanggal', styles: { fontStyle: 'bold', cellWidth: 28 } },
+          { content: `: ${formattedDate}`, styles: { cellWidth: 106 } },
+          { content: 'Penyelenggara', styles: { fontStyle: 'bold', cellWidth: 28 } },
+          { content: `: ${meeting.organizer}`, styles: { cellWidth: 107 } }
+        ],
+        [
+          { content: 'Waktu Pelaksanaan', styles: { fontStyle: 'bold', cellWidth: 28 } },
+          {
+            content: `: ${meeting.timeStart} - ${meeting.timeEnd || 'Selesai'} ${meeting.timezone || 'WIB'}`,
+            styles: { cellWidth: 106 }
+          },
+          { content: 'Pimpinan Rapat', styles: { fontStyle: 'bold', cellWidth: 28 } },
+          { content: `: ${meeting.leader}`, styles: { cellWidth: 107 } }
+        ]
+      ],
+      startY: 22,
+      theme: 'grid',
+      margin: { left: marginX, right: marginX },
+      styles: {
+        font: 'helvetica',
+        fontSize: 8,
+        cellPadding: { top: 1.4, bottom: 1.4, left: 2.5, right: 2.5 },
+        textColor: [30, 41, 59],
+        fillColor: [248, 250, 252],
+        lineColor: [203, 213, 225],
+        lineWidth: 0.15,
+        overflow: 'linebreak',
+        valign: 'top'
+      }
+    });
 
-    infoY += 4.5;
-    doc.setFont('helvetica', 'bold');
-    doc.text('Waktu', col1X, infoY);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`: ${meeting.timeStart} - ${meeting.timeEnd || 'Selesai'} ${meeting.timezone || 'WIB'}`, col1ValX, infoY);
-
-    // Right column
-    let rightInfoY = 22;
-    doc.setFont('helvetica', 'bold');
-    doc.text('Tempat / Ruang', col2X, rightInfoY);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`: ${meeting.location}`, col2ValX, rightInfoY);
-
-    rightInfoY += 4.5;
-    doc.setFont('helvetica', 'bold');
-    doc.text('Penyelenggara', col2X, rightInfoY);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`: ${meeting.organizer}`, col2ValX, rightInfoY);
-
-    rightInfoY += 4.5;
-    doc.setFont('helvetica', 'bold');
-    doc.text('Pimpinan Rapat', col2X, rightInfoY);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`: ${meeting.leader}`, col2ValX, rightInfoY);
-
-    // Table setup
-    const startTableY = 38;
+    // --- 3. ATTENDANCE TABLE (Starts dynamically below detail box) ---
+    // @ts-expect-error autoTable adds lastAutoTable to doc
+    const detailBoxFinalY: number = doc.lastAutoTable ? doc.lastAutoTable.finalY + 4 : 42;
 
     const tableHeaders = [
       [
         { content: 'No.', styles: { halign: 'center' as const } },
-        { content: 'Nama Lengkap Peserta & NIP', styles: { halign: 'left' as const } },
+        { content: 'Nama Lengkap & NIP', styles: { halign: 'left' as const } },
         { content: 'Instansi / Unit Kerja', styles: { halign: 'left' as const } },
-        { content: 'Jabatan / Peran', styles: { halign: 'left' as const } },
-        { content: 'No. HP / WA', styles: { halign: 'center' as const } },
-        { content: 'Status Kehadiran', styles: { halign: 'center' as const } },
-        { content: 'Tanda Tangan Digital', styles: { halign: 'center' as const } }
+        { content: 'Jabatan', styles: { halign: 'left' as const } },
+        { content: 'No. HP', styles: { halign: 'center' as const } },
+        { content: 'E-mail', styles: { halign: 'left' as const } },
+        { content: 'Tanda Tangan', styles: { halign: 'center' as const } }
       ]
     ];
 
     const tableRows = sheetRecords.map((rec, index) => {
       const nipText = rec.nip && rec.nip !== '-' ? `\nNIP. ${rec.nip}` : '';
       const nameCell = `${rec.fullName}${nipText}`;
-      const typeLabel = rec.attendanceType === 'luring' ? 'Luring (Tatap Muka)' : 'Daring (Online/Zoom)';
 
       return [
         (index + 1).toString(),
@@ -116,7 +118,7 @@ export function generateAttendancePDF(
         rec.institution || '-',
         rec.position || '-',
         rec.phone || '-',
-        typeLabel,
+        rec.email || '-',
         '' // Signature rendered in didDrawCell
       ];
     });
@@ -127,9 +129,9 @@ export function generateAttendancePDF(
         { content: '1', styles: { halign: 'center' as const } },
         { content: '(Belum ada peserta terdaftar)', colSpan: 6, styles: { halign: 'center' as const, textColor: [150, 150, 150] } }
       ]],
-      startY: startTableY,
+      startY: detailBoxFinalY,
       theme: 'grid',
-      margin: { left: marginX, right: marginX, bottom: 35 },
+      margin: { left: marginX, right: marginX, bottom: 16 },
       styles: {
         font: 'helvetica',
         fontSize: 8,
@@ -150,12 +152,12 @@ export function generateAttendancePDF(
       },
       columnStyles: {
         0: { cellWidth: 10, halign: 'center' },
-        1: { cellWidth: 64 },
-        2: { cellWidth: 60 },
-        3: { cellWidth: 48 },
-        4: { cellWidth: 30, halign: 'center' },
-        5: { cellWidth: 26, halign: 'center' },
-        6: { cellWidth: 32, halign: 'center', minCellHeight: 16 }
+        1: { cellWidth: 52 },
+        2: { cellWidth: 48 },
+        3: { cellWidth: 38 },
+        4: { cellWidth: 28, halign: 'center' },
+        5: { cellWidth: 48 },
+        6: { cellWidth: 45, halign: 'center', minCellHeight: 15 }
       },
       didDrawCell: (data) => {
         if (data.column.index === 6 && data.section === 'body') {
@@ -180,31 +182,35 @@ export function generateAttendancePDF(
         const str = `Halaman ${doc.getNumberOfPages()}`;
         doc.setFontSize(7.5);
         doc.setTextColor(120, 120, 120);
-        doc.text(str, pageWidth - marginX - 10, pageHeight - 8);
+        doc.text(str, pageWidth - marginX - 10, pageHeight - 6);
 
         const generatedTime = `Dicetak otomatis melalui Sistem Presensi Rapat Direktorat PPISDA: ${sheetTypeDesc}`;
-        doc.text(generatedTime, marginX, pageHeight - 8);
+        doc.text(generatedTime, marginX, pageHeight - 6);
       }
     });
 
+    // --- 4. FOOTER & PENGESAHAN (Rekapitulasi tanpa 'Tanda tangan terisi') ---
     // @ts-expect-error autoTable adds lastAutoTable to doc
-    const finalY: number = doc.lastAutoTable ? doc.lastAutoTable.finalY + 8 : 150;
+    const finalY: number = doc.lastAutoTable ? doc.lastAutoTable.finalY + 6 : 140;
 
     let signY = finalY;
-    if (signY > pageHeight - 38) {
+    if (signY + 38 > pageHeight - 12) {
       doc.addPage();
       signY = 20;
     }
 
-    // Summary box
+    // Summary box on left (Strictly NO 'Tanda tangan terisi' per user request)
+    doc.setFillColor(248, 250, 252);
+    doc.setDrawColor(203, 213, 225);
+    doc.roundedRect(marginX, signY, 70, 16, 2, 2, 'FD');
+
     doc.setFontSize(8);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(15, 23, 42);
-    doc.text('Keterangan Presensi:', marginX, signY);
+    doc.text('Rekapitulasi:', marginX + 3.5, signY + 6);
 
     doc.setFont('helvetica', 'normal');
-    doc.text(`• Jumlah Peserta ${subTitleTag} : ${sheetRecords.length} Orang`, marginX, signY + 4.5);
-    doc.text(`• Status Tanda Tangan Lengkap : ${sheetRecords.filter(r => !!r.signature).length} Orang`, marginX, signY + 8.5);
+    doc.text(`• Jumlah Peserta Terdaftar : ${sheetRecords.length} Orang`, marginX + 3.5, signY + 11.5);
 
     // Sign-off block on the right (jika showLeaderSignature aktif)
     if (meeting.showLeaderSignature !== false) {
@@ -217,17 +223,19 @@ export function generateAttendancePDF(
       const signLocationText = meeting.signLocation?.trim() || 'Lokasi Rapat';
 
       doc.setFont('helvetica', 'normal');
-      doc.text(`${signLocationText}, ${dateFormattedSign}`, signBlockX, signY);
+      doc.setFontSize(8.5);
+      doc.setTextColor(30, 41, 59);
+      doc.text(`${signLocationText}, ${dateFormattedSign}`, signBlockX, signY + 3);
       doc.setFont('helvetica', 'bold');
-      doc.text('Mengetahui / Mengesahkan,', signBlockX, signY + 4.5);
-      doc.text('Pimpinan Rapat,', signBlockX, signY + 8.5);
+      doc.text('Mengetahui / Mengesahkan,', signBlockX, signY + 7.5);
+      doc.text('Pimpinan Rapat,', signBlockX, signY + 11.5);
 
-      // Leader name
+      // Leader name & NIP
       doc.setFont('helvetica', 'bold');
-      doc.text(meeting.leader, signBlockX, signY + 28);
+      doc.text(meeting.leader, signBlockX, signY + 29);
       if (meeting.leaderNip) {
         doc.setFont('helvetica', 'normal');
-        doc.text(`NIP. ${meeting.leaderNip}`, signBlockX, signY + 32);
+        doc.text(`NIP. ${meeting.leaderNip}`, signBlockX, signY + 33.5);
       }
     }
   };
