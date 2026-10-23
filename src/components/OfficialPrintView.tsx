@@ -120,12 +120,12 @@ export const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({
           <table className="w-full text-left border-collapse text-xs print:text-[11px] min-w-[640px] sm:min-w-0">
             <thead>
               <tr className="bg-slate-100 border-b border-slate-400 font-bold text-slate-900 text-center">
-                <th className="py-2.5 px-2 border-r border-slate-300 w-10">No.</th>
-                <th className="py-2.5 px-3 border-r border-slate-300 text-left">Nama Lengkap & NIP</th>
-                <th className="py-2.5 px-3 border-r border-slate-300 text-left">Instansi / Unit Kerja</th>
-                <th className="py-2.5 px-3 border-r border-slate-300 text-left">Jabatan</th>
+                <th className="py-2.5 px-2 border-r border-slate-300 w-10 text-center">No.</th>
+                <th className="py-2.5 px-3 border-r border-slate-300 text-center">Nama Lengkap</th>
+                <th className="py-2.5 px-3 border-r border-slate-300 text-center">Instansi / Unit Kerja</th>
+                <th className="py-2.5 px-3 border-r border-slate-300 text-center">Jabatan</th>
                 <th className="py-2.5 px-3 border-r border-slate-300 w-28 text-center">No. HP</th>
-                <th className="py-2.5 px-3 border-r border-slate-300 text-left">E-mail</th>
+                <th className="py-2.5 px-3 border-r border-slate-300 text-center">E-mail</th>
                 <th className="py-2.5 px-3 w-44 text-center">Tanda Tangan</th>
               </tr>
             </thead>

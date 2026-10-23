@@ -99,13 +99,13 @@ export function generateAttendancePDF(
 
     const tableHeaders = [
       [
-        { content: 'No.', styles: { halign: 'center' as const } },
-        { content: 'Nama Lengkap & NIP', styles: { halign: 'left' as const } },
-        { content: 'Instansi / Unit Kerja', styles: { halign: 'left' as const } },
-        { content: 'Jabatan', styles: { halign: 'left' as const } },
-        { content: 'No. HP', styles: { halign: 'center' as const } },
-        { content: 'E-mail', styles: { halign: 'left' as const } },
-        { content: 'Tanda Tangan', styles: { halign: 'center' as const } }
+        { content: 'No.', styles: { halign: 'center' as const, valign: 'middle' as const } },
+        { content: 'Nama Lengkap', styles: { halign: 'center' as const, valign: 'middle' as const } },
+        { content: 'Instansi / Unit Kerja', styles: { halign: 'center' as const, valign: 'middle' as const } },
+        { content: 'Jabatan', styles: { halign: 'center' as const, valign: 'middle' as const } },
+        { content: 'No. HP', styles: { halign: 'center' as const, valign: 'middle' as const } },
+        { content: 'E-mail', styles: { halign: 'center' as const, valign: 'middle' as const } },
+        { content: 'Tanda Tangan', styles: { halign: 'center' as const, valign: 'middle' as const } }
       ]
     ];
 
@@ -147,6 +147,8 @@ export function generateAttendancePDF(
         fillColor: [241, 245, 249],
         textColor: [15, 23, 42],
         fontStyle: 'bold',
+        halign: 'center',
+        valign: 'middle',
         lineColor: [148, 163, 184],
         lineWidth: 0.3,
         minCellHeight: 8

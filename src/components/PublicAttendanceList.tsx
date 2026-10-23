@@ -97,7 +97,7 @@ export const PublicAttendanceList: React.FC<PublicAttendanceListProps> = ({ reco
               <thead>
                 <tr className="bg-slate-50/50 border-b border-slate-200 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                   <th className="py-2.5 px-4 text-center w-12">No.</th>
-                  <th className="py-2.5 px-4">Nama Lengkap & NIP</th>
+                  <th className="py-2.5 px-4">Nama Lengkap</th>
                   <th className="py-2.5 px-4">Instansi / Unit Kerja</th>
                   <th className="py-2.5 px-4">Jabatan</th>
                   <th className="py-2.5 px-4 text-center">Waktu Presensi</th>
