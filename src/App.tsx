@@ -239,7 +239,7 @@ export default function App() {
             </a>
           </div>
 
-          {/* Zone 2: Clean single-line text navigation link & active agenda */}
+          {/* Zone 2: Clean single-line text navigation link */}
           <nav className="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-600">
             <button
               type="button"
@@ -250,10 +250,6 @@ export default function App() {
             >
               Formulir Kehadiran Rapat
             </button>
-            <span className="text-slate-300">·</span>
-            <div className="text-[11px] text-slate-500 font-medium whitespace-nowrap truncate max-w-[340px]">
-              Agenda: {currentMeeting.title}
-            </div>
           </nav>
 
           {/* Zone 3: 1 primary action */}
