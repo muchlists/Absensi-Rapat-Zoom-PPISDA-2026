@@ -26,7 +26,8 @@ import {
   addAttendanceRecordToCloud,
   fetchFullDataFromCloud,
   uploadLocalDataToCloud,
-  isFirebaseConfigured
+  isFirebaseConfigured,
+  deduplicateAttendance
 } from './services/firebase';
 import { MeetingHeader } from './components/MeetingHeader';
 import { AttendanceForm } from './components/AttendanceForm';
@@ -135,8 +136,9 @@ export default function App() {
   };
 
   const handleUpdateAttendance = (newAttendance: AttendanceRecord[]) => {
-    setAttendance(newAttendance);
-    saveStoredAttendance(newAttendance, true);
+    const deduped = deduplicateAttendance(newAttendance);
+    setAttendance(deduped);
+    saveStoredAttendance(deduped, true);
   };
 
   const handleUpdateSettings = (newSettings: AdminSettings) => {
@@ -182,13 +184,22 @@ export default function App() {
 
   // Handler when participant submits attendance
   const handleAttendanceSubmit = (newRecord: AttendanceRecord) => {
-    const updated = [newRecord, ...attendance];
-    handleUpdateAttendance(updated);
-    if (isFirebaseConfigured()) {
-      addAttendanceRecordToCloud(newRecord).catch((err) =>
-        console.warn('Background add attendance to cloud failed', err)
-      );
-    }
+    // 1. Guard against duplicates in local state & storage
+    setAttendance((prev) => {
+      if (prev.some((r) => r.id === newRecord.id)) {
+        return prev;
+      }
+      const updated = [newRecord, ...prev];
+      // Save to localStorage only (avoid double-syncing full array to cloud)
+      saveStoredAttendance(updated, false);
+      return updated;
+    });
+
+    // 2. Push ONLY the single new record to Firebase by its unique ID
+    addAttendanceRecordToCloud(newRecord).catch((err) =>
+      console.warn('Background add attendance to cloud failed', err)
+    );
+
     setJustSubmittedRecord(newRecord);
   };
 

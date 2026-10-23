@@ -113,6 +113,22 @@ export async function testFirebaseConnection(config: FirebaseConfig): Promise<{ 
 }
 
 // -------------------------------------------------------------
+// Helper: Deduplicate Attendance Records by ID
+// -------------------------------------------------------------
+export function deduplicateAttendance(records: any[]): AttendanceRecord[] {
+  if (!Array.isArray(records)) return [];
+  const map = new Map<string, AttendanceRecord>();
+  for (const item of records) {
+    if (item && typeof item === 'object' && item.id) {
+      if (!map.has(item.id)) {
+        map.set(item.id, item as AttendanceRecord);
+      }
+    }
+  }
+  return Array.from(map.values());
+}
+
+// -------------------------------------------------------------
 // Realtime Database Subscriptions
 // -------------------------------------------------------------
 
@@ -156,11 +172,16 @@ export function subscribeToAttendance(callback: (attendance: AttendanceRecord[])
       (snapshot) => {
         if (snapshot.exists()) {
           const val = snapshot.val();
+          let rawList: any[] = [];
           if (Array.isArray(val)) {
-            callback(val);
+            rawList = val;
           } else if (typeof val === 'object' && val !== null) {
-            callback(Object.values(val));
+            rawList = Object.values(val);
           }
+          const cleaned = deduplicateAttendance(rawList);
+          callback(cleaned);
+        } else {
+          callback([]);
         }
       },
       (error) => {
@@ -237,10 +258,18 @@ export async function saveAttendanceToCloud(attendance: AttendanceRecord[]): Pro
   const config = getStoredFirebaseConfig();
   if (!config) return false;
 
+  const deduped = deduplicateAttendance(attendance);
+  const dict = deduped.reduce<Record<string, AttendanceRecord>>((acc, item) => {
+    if (item && item.id) {
+      acc[item.id] = item;
+    }
+    return acc;
+  }, {});
+
   const db = activeDb || initFirebase(config);
   if (db) {
     try {
-      await set(ref(db, 'ppisda/attendance'), attendance);
+      await set(ref(db, 'ppisda/attendance'), dict);
       return true;
     } catch (err) {
       console.warn('Firebase SDK set attendance failed, trying REST fallback', err);
@@ -251,7 +280,7 @@ export async function saveAttendanceToCloud(attendance: AttendanceRecord[]): Pro
     const res = await fetch(`${sanitizeDatabaseUrl(config.databaseURL)}/ppisda/attendance.json`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(attendance)
+      body: JSON.stringify(dict)
     });
     return res.ok;
   } catch (err) {
@@ -383,7 +412,12 @@ export async function fetchFullDataFromCloud(): Promise<{
 
     let parsedAttendance: AttendanceRecord[] | undefined;
     if (data.attendance) {
-      parsedAttendance = Array.isArray(data.attendance) ? data.attendance : Object.values(data.attendance);
+      const rawList = Array.isArray(data.attendance) ? data.attendance : Object.values(data.attendance);
+      parsedAttendance = deduplicateAttendance(rawList);
+      // If duplicates existed in raw database, rewrite cleanly to heal the database
+      if (rawList.length > parsedAttendance.length) {
+        saveAttendanceToCloud(parsedAttendance).catch(() => {});
+      }
     }
 
     return {

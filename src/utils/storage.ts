@@ -4,7 +4,8 @@ import {
   saveMeetingsToCloud,
   saveAttendanceToCloud,
   saveSettingsToCloud,
-  isFirebaseConfigured
+  isFirebaseConfigured,
+  deduplicateAttendance
 } from '../services/firebase';
 
 const STORAGE_KEYS = {
@@ -55,7 +56,9 @@ export function getStoredAttendance(): AttendanceRecord[] {
     const data = localStorage.getItem(STORAGE_KEYS.ATTENDANCE);
     if (data) {
       const parsed = JSON.parse(data);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return deduplicateAttendance(parsed);
+      }
     }
   } catch (err) {
     console.error('Error loading attendance from storage', err);
@@ -72,15 +75,17 @@ export function getStoredAttendance(): AttendanceRecord[] {
     return record;
   });
 
-  saveStoredAttendance(seeded);
-  return seeded;
+  const deduped = deduplicateAttendance(seeded);
+  saveStoredAttendance(deduped, false);
+  return deduped;
 }
 
 export function saveStoredAttendance(attendance: AttendanceRecord[], syncToCloud = true): void {
   try {
-    localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attendance));
+    const deduped = deduplicateAttendance(attendance);
+    localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(deduped));
     if (syncToCloud && isFirebaseConfigured()) {
-      saveAttendanceToCloud(attendance).catch((err) => console.warn('Background sync attendance failed', err));
+      saveAttendanceToCloud(deduped).catch((err) => console.warn('Background sync attendance failed', err));
     }
   } catch (err) {
     console.error('Error saving attendance to storage', err);

@@ -61,6 +61,7 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     if (!validate()) {
       const firstErrorKey = Object.keys(errors)[0];
       const el = document.getElementById(`input-${firstErrorKey}`);
