@@ -1409,7 +1409,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   Pilih "Start in test mode"
                 </div>
                 <p className="text-slate-200 text-[11px] leading-relaxed">
-                  Pada tahap Security rules, centang <strong className="text-white">"Start in test mode"</strong> (agar peserta dan admin dapat membaca & menulis data presensi), lalu klik <strong>Enable</strong>.
+                  Pada tahap Security rules, centang <strong className="text-white">"Start in test mode"</strong>, lalu klik <strong>Enable</strong>.
+                </p>
+                <p className="text-[10px] text-amber-200/90 bg-black/20 p-1.5 rounded mt-1 border border-white/5">
+                  💡 <strong>Tips Permanen (Tanpa Batas 30 Hari):</strong> Di tab <em>Rules (Aturan)</em>, ubah <code className="text-white">".read": true, ".write": true</code> lalu klik <em>Publish</em> agar aktif selamanya.
                 </p>
               </div>
             </div>
