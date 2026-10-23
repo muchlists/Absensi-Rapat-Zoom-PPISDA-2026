@@ -46,11 +46,11 @@ export const MeetingHeader: React.FC<MeetingHeaderProps> = ({ meeting }) => {
           <div className="p-1.5 rounded-lg bg-blue-50 text-blue-700 shrink-0">
             <Calendar className="w-4 h-4" />
           </div>
-          <div>
+          <div className="min-w-0 flex-1">
             <div className="text-[11px] font-semibold text-slate-500 uppercase">
               Hari & Tanggal
             </div>
-            <div className="font-semibold text-slate-800 text-sm mt-0.5">
+            <div className="font-semibold text-slate-800 text-sm mt-0.5 leading-snug">
               {formattedDate}
             </div>
           </div>
@@ -60,11 +60,11 @@ export const MeetingHeader: React.FC<MeetingHeaderProps> = ({ meeting }) => {
           <div className="p-1.5 rounded-lg bg-blue-50 text-blue-700 shrink-0">
             <Clock className="w-4 h-4" />
           </div>
-          <div>
+          <div className="min-w-0 flex-1">
             <div className="text-[11px] font-semibold text-slate-500 uppercase">
               Waktu Pelaksanaan
             </div>
-            <div className="font-semibold text-slate-800 text-sm mt-0.5 font-mono tabular-nums">
+            <div className="font-semibold text-slate-800 text-sm mt-0.5 font-mono tabular-nums leading-snug">
               {meeting.timeStart} - {meeting.timeEnd || 'Selesai'} {meeting.timezone || 'WIB'}
             </div>
           </div>
@@ -74,11 +74,11 @@ export const MeetingHeader: React.FC<MeetingHeaderProps> = ({ meeting }) => {
           <div className="p-1.5 rounded-lg bg-blue-50 text-blue-700 shrink-0">
             <MapPin className="w-4 h-4" />
           </div>
-          <div>
+          <div className="min-w-0 flex-1">
             <div className="text-[11px] font-semibold text-slate-500 uppercase">
               Lokasi / Akses Rapat
             </div>
-            <div className="font-semibold text-slate-800 text-sm mt-0.5 line-clamp-1" title={meeting.location}>
+            <div className="font-semibold text-slate-800 text-sm mt-0.5 leading-snug break-words" title={meeting.location}>
               {meeting.location}
             </div>
           </div>
@@ -88,11 +88,11 @@ export const MeetingHeader: React.FC<MeetingHeaderProps> = ({ meeting }) => {
           <div className="p-1.5 rounded-lg bg-blue-50 text-blue-700 shrink-0">
             <User className="w-4 h-4" />
           </div>
-          <div>
+          <div className="min-w-0 flex-1">
             <div className="text-[11px] font-semibold text-slate-500 uppercase">
               Pimpinan Rapat
             </div>
-            <div className="font-semibold text-slate-800 text-sm mt-0.5 line-clamp-1" title={meeting.leader}>
+            <div className="font-semibold text-slate-800 text-sm mt-0.5 leading-snug break-words" title={meeting.leader}>
               {meeting.leader}
             </div>
           </div>
