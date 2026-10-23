@@ -7,7 +7,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import {
   Lock,
   ClipboardList,
-  ClipboardCheck
+  ClipboardCheck,
+  Cloud,
+  Wifi,
+  WifiOff
 } from 'lucide-react';
 import { Meeting, AttendanceRecord, AdminSettings } from './types';
 import {
@@ -19,6 +22,15 @@ import {
   saveStoredSettings,
   resetToDefaultData
 } from './utils/storage';
+import {
+  subscribeToMeetings,
+  subscribeToAttendance,
+  subscribeToSettings,
+  addAttendanceRecordToCloud,
+  fetchFullDataFromCloud,
+  uploadLocalDataToCloud,
+  isFirebaseConfigured
+} from './services/firebase';
 import { MeetingHeader } from './components/MeetingHeader';
 import { AttendanceForm } from './components/AttendanceForm';
 import { SuccessModal } from './components/SuccessModal';
@@ -35,11 +47,12 @@ export default function App() {
   const [currentView, setCurrentView] = useState<'attendance' | 'admin'>('attendance');
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(false);
   const [showAdminLoginModal, setShowAdminLoginModal] = useState<boolean>(false);
+  const [isCloudActive, setIsCloudActive] = useState<boolean>(() => isFirebaseConfigured());
 
   // Success Confirmation Modal
   const [justSubmittedRecord, setJustSubmittedRecord] = useState<AttendanceRecord | null>(null);
 
-  // Initial load
+  // Initial load & Firebase synchronization
   useEffect(() => {
     const loadedMeetings = getStoredMeetings();
     const loadedAttendance = getStoredAttendance();
@@ -61,22 +74,84 @@ export default function App() {
         setActiveMeetingId(active.id);
       }
     }
+
+    // Connect to Firebase if configured
+    if (isFirebaseConfigured()) {
+      setIsCloudActive(true);
+
+      // 1. Initial snapshot fetch from cloud to keep this device completely fresh
+      fetchFullDataFromCloud()
+        .then((cloudData) => {
+          if (cloudData) {
+            if (cloudData.meetings && cloudData.meetings.length > 0) {
+              setMeetings(cloudData.meetings);
+              saveStoredMeetings(cloudData.meetings, false);
+            } else {
+              // If cloud is empty, seed cloud with local data so other devices can access it
+              uploadLocalDataToCloud(loadedMeetings, loadedAttendance, loadedSettings);
+            }
+
+            if (cloudData.attendance && cloudData.attendance.length > 0) {
+              setAttendance(cloudData.attendance);
+              saveStoredAttendance(cloudData.attendance, false);
+            }
+
+            if (cloudData.settings) {
+              setSettings(cloudData.settings);
+              saveStoredSettings(cloudData.settings, false);
+            }
+          }
+        })
+        .catch((err) => {
+          console.warn('Initial cloud sync fetch failed', err);
+        });
+
+      // 2. Real-time push listeners (changes on any device update this device instantly)
+      const unsubMeetings = subscribeToMeetings((remoteMeetings) => {
+        if (remoteMeetings && remoteMeetings.length > 0) {
+          setMeetings(remoteMeetings);
+          saveStoredMeetings(remoteMeetings, false);
+        }
+      });
+
+      const unsubAttendance = subscribeToAttendance((remoteAttendance) => {
+        if (remoteAttendance) {
+          setAttendance(remoteAttendance);
+          saveStoredAttendance(remoteAttendance, false);
+        }
+      });
+
+      const unsubSettings = subscribeToSettings((remoteSettings) => {
+        if (remoteSettings) {
+          setSettings(remoteSettings);
+          saveStoredSettings(remoteSettings, false);
+        }
+      });
+
+      return () => {
+        unsubMeetings();
+        unsubAttendance();
+        unsubSettings();
+      };
+    } else {
+      setIsCloudActive(false);
+    }
   }, []);
 
   // Sync state to storage
   const handleUpdateMeetings = (newMeetings: Meeting[]) => {
     setMeetings(newMeetings);
-    saveStoredMeetings(newMeetings);
+    saveStoredMeetings(newMeetings, true);
   };
 
   const handleUpdateAttendance = (newAttendance: AttendanceRecord[]) => {
     setAttendance(newAttendance);
-    saveStoredAttendance(newAttendance);
+    saveStoredAttendance(newAttendance, true);
   };
 
   const handleUpdateSettings = (newSettings: AdminSettings) => {
     setSettings(newSettings);
-    saveStoredSettings(newSettings);
+    saveStoredSettings(newSettings, true);
   };
 
   const handleResetData = () => {
@@ -85,6 +160,9 @@ export default function App() {
     setAttendance(reset.attendance);
     setSettings(reset.settings);
     setActiveMeetingId(reset.meetings[0]?.id || '');
+    if (isFirebaseConfigured()) {
+      uploadLocalDataToCloud(reset.meetings, reset.attendance, reset.settings);
+    }
   };
 
   // Active meeting object
@@ -97,7 +175,7 @@ export default function App() {
       timeStart: '09:00',
       timeEnd: '12:00',
       location: 'Ruang Rapat Utama Gd. Ditjen Pembiayaan Infrastruktur / Zoom',
-      organizer: 'Direktorat Pelaksanaan Pembiayaan Infrastruktur Sumber Daya Air (PPISDA)',
+      organizer: 'Direktorat Pelaksanaan Pembiayaan Infrastruktur Sumber Daya Air, DIREKTORAT JENDERAL PEMBIAYAAN INFRASTRUKTUR PEKERJAAN UMUM',
       leader: 'Pimpinan Rapat',
       isActive: true,
       createdAt: new Date().toISOString()
@@ -116,6 +194,11 @@ export default function App() {
   const handleAttendanceSubmit = (newRecord: AttendanceRecord) => {
     const updated = [newRecord, ...attendance];
     handleUpdateAttendance(updated);
+    if (isFirebaseConfigured()) {
+      addAttendanceRecordToCloud(newRecord).catch((err) =>
+        console.warn('Background add attendance to cloud failed', err)
+      );
+    }
     setJustSubmittedRecord(newRecord);
   };
 
@@ -172,8 +255,28 @@ export default function App() {
             </div>
           </nav>
 
-          {/* Zone 3: 1 primary action */}
-          <div className="flex items-center gap-3 shrink-0">
+          {/* Zone 3: Actions & Cloud Sync Status */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {isCloudActive ? (
+              <div
+                className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs"
+                title="Tersambung ke Cloud Firebase: Data sinkron otomatis di semua perangkat (laptop panitia & HP peserta)"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Cloud Sync Online</span>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={handleOpenAdmin}
+                className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition-colors shadow-2xs"
+                title="Saat ini data hanya tersimpan di memori browser ini. Klik untuk menghubungkan Cloud Database"
+              >
+                <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                <span>Mode Lokal</span>
+              </button>
+            )}
+
             {currentView === 'attendance' ? (
               <button
                 type="button"

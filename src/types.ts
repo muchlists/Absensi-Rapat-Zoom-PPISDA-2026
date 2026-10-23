@@ -41,3 +41,21 @@ export interface AdminSettings {
   subInstitution: string;
   address: string;
 }
+
+export interface FirebaseConfig {
+  databaseURL: string;
+  apiKey?: string;
+  authDomain?: string;
+  projectId?: string;
+  storageBucket?: string;
+  messagingSenderId?: string;
+  appId?: string;
+}
+
+export interface CloudSyncStatus {
+  isConfigured: boolean;
+  isConnected: boolean;
+  lastSyncedAt?: string;
+  databaseURL?: string;
+}
+

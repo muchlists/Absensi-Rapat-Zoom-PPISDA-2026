@@ -1,5 +1,11 @@
 import { Meeting, AttendanceRecord, AdminSettings } from '../types';
 import { INITIAL_MEETINGS, INITIAL_ATTENDANCE, INITIAL_SETTINGS, createMockSignatureSvg } from '../data/initialData';
+import {
+  saveMeetingsToCloud,
+  saveAttendanceToCloud,
+  saveSettingsToCloud,
+  isFirebaseConfigured
+} from '../services/firebase';
 
 const STORAGE_KEYS = {
   MEETINGS: 'ppisda_meetings_v4',
@@ -33,9 +39,12 @@ export function getStoredMeetings(): Meeting[] {
   return INITIAL_MEETINGS;
 }
 
-export function saveStoredMeetings(meetings: Meeting[]): void {
+export function saveStoredMeetings(meetings: Meeting[], syncToCloud = true): void {
   try {
     localStorage.setItem(STORAGE_KEYS.MEETINGS, JSON.stringify(meetings));
+    if (syncToCloud && isFirebaseConfigured()) {
+      saveMeetingsToCloud(meetings).catch((err) => console.warn('Background sync meetings failed', err));
+    }
   } catch (err) {
     console.error('Error saving meetings to storage', err);
   }
@@ -67,9 +76,12 @@ export function getStoredAttendance(): AttendanceRecord[] {
   return seeded;
 }
 
-export function saveStoredAttendance(attendance: AttendanceRecord[]): void {
+export function saveStoredAttendance(attendance: AttendanceRecord[], syncToCloud = true): void {
   try {
     localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attendance));
+    if (syncToCloud && isFirebaseConfigured()) {
+      saveAttendanceToCloud(attendance).catch((err) => console.warn('Background sync attendance failed', err));
+    }
   } catch (err) {
     console.error('Error saving attendance to storage', err);
   }
@@ -94,9 +106,12 @@ export function getStoredSettings(): AdminSettings {
   return INITIAL_SETTINGS;
 }
 
-export function saveStoredSettings(settings: AdminSettings): void {
+export function saveStoredSettings(settings: AdminSettings, syncToCloud = true): void {
   try {
     localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
+    if (syncToCloud && isFirebaseConfigured()) {
+      saveSettingsToCloud(settings).catch((err) => console.warn('Background sync settings failed', err));
+    }
   } catch (err) {
     console.error('Error saving settings to storage', err);
   }
