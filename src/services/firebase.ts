@@ -143,10 +143,15 @@ export function subscribeToMeetings(callback: (meetings: Meeting[]) => void): ()
       (snapshot) => {
         if (snapshot.exists()) {
           const val = snapshot.val();
+          let list: any[] = [];
           if (Array.isArray(val)) {
-            callback(val);
+            list = val;
           } else if (typeof val === 'object' && val !== null) {
-            callback(Object.values(val));
+            list = Object.values(val);
+          }
+          const valid = list.filter((m) => m && typeof m === 'object' && m.id);
+          if (valid.length > 0) {
+            callback(valid);
           }
         }
       },
@@ -407,7 +412,9 @@ export async function fetchFullDataFromCloud(): Promise<{
 
     let parsedMeetings: Meeting[] | undefined;
     if (data.meetings) {
-      parsedMeetings = Array.isArray(data.meetings) ? data.meetings : Object.values(data.meetings);
+      const rawList = Array.isArray(data.meetings) ? data.meetings : Object.values(data.meetings);
+      const cleaned = rawList.filter((m: any) => m && typeof m === 'object' && m.id);
+      parsedMeetings = cleaned.length > 0 ? (cleaned as Meeting[]) : undefined;
     }
 
     let parsedAttendance: AttendanceRecord[] | undefined;

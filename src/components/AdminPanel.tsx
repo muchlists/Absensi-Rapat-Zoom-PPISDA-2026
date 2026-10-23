@@ -105,43 +105,49 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
   // The meeting currently inspected in admin
   const activeAdminMeeting = useMemo(() => {
-    return meetings.find((m) => m.id === selectedMeetingId) || currentMeeting;
+    const valid = Array.isArray(meetings)
+      ? meetings.filter((m): m is Meeting => Boolean(m && typeof m === 'object' && m.id))
+      : [];
+    return valid.find((m) => m.id === selectedMeetingId) || currentMeeting;
   }, [meetings, selectedMeetingId, currentMeeting]);
 
   // Attendance for the chosen meeting
   const meetingAttendance = useMemo(() => {
-    return allAttendance.filter((rec) => rec.meetingId === activeAdminMeeting.id);
-  }, [allAttendance, activeAdminMeeting.id]);
+    if (!Array.isArray(allAttendance) || !activeAdminMeeting?.id) return [];
+    return allAttendance.filter((rec) => rec && typeof rec === 'object' && rec.meetingId === activeAdminMeeting.id);
+  }, [allAttendance, activeAdminMeeting?.id]);
 
   // Filtered attendance for display
   const luringAttendance = useMemo(() => {
     return meetingAttendance
-      .filter((r) => r.attendanceType === 'luring')
+      .filter((r) => r?.attendanceType === 'luring')
       .filter((rec) => {
+        if (!rec) return false;
         if (!searchQuery.trim()) return true;
         const q = searchQuery.toLowerCase();
         return (
-          rec.fullName.toLowerCase().includes(q) ||
-          rec.institution.toLowerCase().includes(q) ||
-          rec.position.toLowerCase().includes(q) ||
-          rec.nip.toLowerCase().includes(q) ||
-          rec.phone.includes(q)
+          (rec.fullName && rec.fullName.toLowerCase().includes(q)) ||
+          (rec.institution && rec.institution.toLowerCase().includes(q)) ||
+          (rec.position && rec.position.toLowerCase().includes(q)) ||
+          (rec.nip && rec.nip.toLowerCase().includes(q)) ||
+          (rec.phone && rec.phone.includes(q))
         );
       });
   }, [meetingAttendance, searchQuery]);
 
   const daringAttendance = useMemo(() => {
     return meetingAttendance
-      .filter((r) => r.attendanceType === 'daring')
+      .filter((r) => r?.attendanceType === 'daring')
       .filter((rec) => {
+        if (!rec) return false;
         if (!searchQuery.trim()) return true;
         const q = searchQuery.toLowerCase();
         return (
-          rec.fullName.toLowerCase().includes(q) ||
-          rec.institution.toLowerCase().includes(q) ||
-          rec.position.toLowerCase().includes(q) ||
-          rec.nip.toLowerCase().includes(q) ||
-          rec.phone.includes(q)
+          (rec.fullName && rec.fullName.toLowerCase().includes(q)) ||
+          (rec.institution && rec.institution.toLowerCase().includes(q)) ||
+          (rec.position && rec.position.toLowerCase().includes(q)) ||
+          (rec.nip && rec.nip.toLowerCase().includes(q)) ||
+          (rec.phone && rec.phone.includes(q))
         );
       });
   }, [meetingAttendance, searchQuery]);
@@ -151,18 +157,20 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     const q = searchQuery.toLowerCase();
     return meetingAttendance.filter(
       (rec) =>
-        rec.fullName.toLowerCase().includes(q) ||
-        rec.institution.toLowerCase().includes(q) ||
-        rec.position.toLowerCase().includes(q) ||
-        rec.nip.toLowerCase().includes(q) ||
-        rec.phone.includes(q)
+        rec && (
+          (rec.fullName && rec.fullName.toLowerCase().includes(q)) ||
+          (rec.institution && rec.institution.toLowerCase().includes(q)) ||
+          (rec.position && rec.position.toLowerCase().includes(q)) ||
+          (rec.nip && rec.nip.toLowerCase().includes(q)) ||
+          (rec.phone && rec.phone.includes(q))
+        )
     );
   }, [meetingAttendance, searchQuery]);
 
   // Calculations
-  const luringCount = meetingAttendance.filter((r) => r.attendanceType === 'luring').length;
-  const daringCount = meetingAttendance.filter((r) => r.attendanceType === 'daring').length;
-  const signedCount = meetingAttendance.filter((r) => !!r.signature).length;
+  const luringCount = meetingAttendance.filter((r) => r?.attendanceType === 'luring').length;
+  const daringCount = meetingAttendance.filter((r) => r?.attendanceType === 'daring').length;
+  const signedCount = meetingAttendance.filter((r) => !!r?.signature).length;
 
   // EXPORT HANDLERS - THESE LIVE EXCLUSIVELY IN THE ADMIN PANEL
   const handleExportCSV = (category: 'all' | 'luring' | 'daring' = 'all') => {

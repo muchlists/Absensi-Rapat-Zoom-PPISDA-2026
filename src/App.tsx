@@ -36,10 +36,53 @@ import { AdminLoginModal } from './components/AdminLoginModal';
 import { AdminPanel } from './components/AdminPanel';
 
 export default function App() {
-  const [meetings, setMeetings] = useState<Meeting[]>([]);
-  const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
-  const [settings, setSettings] = useState<AdminSettings>(() => getStoredSettings());
-  const [activeMeetingId, setActiveMeetingId] = useState<string>('');
+  const [meetings, setMeetings] = useState<Meeting[]>(() => {
+    try {
+      return getStoredMeetings();
+    } catch {
+      return [];
+    }
+  });
+
+  const [attendance, setAttendance] = useState<AttendanceRecord[]>(() => {
+    try {
+      return getStoredAttendance();
+    } catch {
+      return [];
+    }
+  });
+
+  const [settings, setSettings] = useState<AdminSettings>(() => {
+    try {
+      return getStoredSettings();
+    } catch {
+      return {
+        adminPin: '102026',
+        institutionName: 'Direktorat Pelaksanaan Pembiayaan Infrastruktur Sumber Daya Air, Direktorat Jenderal Pembiayaan Infrastruktur Pekerjaan Umum',
+        subInstitution: 'Direktorat Jenderal Pembiayaan Infrastruktur Pekerjaan Umum dan Perumahan - Kementerian PUPR',
+        address: 'Jl. Pattimura No. 20, Kebayoran Baru, Jakarta Selatan 12110 - Telp: (021) 72796155'
+      };
+    }
+  });
+
+  const [activeMeetingId, setActiveMeetingId] = useState<string>(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const meetingQuery = params.get('meeting');
+      const loaded = getStoredMeetings();
+      if (meetingQuery && loaded.some((m) => m && m.id === meetingQuery)) {
+        return meetingQuery;
+      }
+      const savedActive = localStorage.getItem('ppisda_active_meeting_v4');
+      if (savedActive && loaded.some((m) => m && m.id === savedActive)) {
+        return savedActive;
+      }
+      const active = loaded.find((m) => m && m.isActive) || loaded[0];
+      return active?.id || '';
+    } catch {
+      return '';
+    }
+  });
   
   // Navigation & Authentication State
   const [currentView, setCurrentView] = useState<'attendance' | 'admin'>('attendance');
@@ -49,30 +92,17 @@ export default function App() {
   // Success Confirmation Modal
   const [justSubmittedRecord, setJustSubmittedRecord] = useState<AttendanceRecord | null>(null);
 
+  // Keep activeMeetingId saved in localStorage whenever it changes
+  useEffect(() => {
+    if (activeMeetingId) {
+      try {
+        localStorage.setItem('ppisda_active_meeting_v4', activeMeetingId);
+      } catch {}
+    }
+  }, [activeMeetingId]);
+
   // Initial load & Firebase synchronization
   useEffect(() => {
-    const loadedMeetings = getStoredMeetings();
-    const loadedAttendance = getStoredAttendance();
-    const loadedSettings = getStoredSettings();
-
-    setMeetings(loadedMeetings);
-    setAttendance(loadedAttendance);
-    setSettings(loadedSettings);
-
-    // Support direct meeting link generation via ?meeting=id
-    const params = new URLSearchParams(window.location.search);
-    const meetingQuery = params.get('meeting');
-
-    if (meetingQuery && loadedMeetings.some((m) => m.id === meetingQuery)) {
-      setActiveMeetingId(meetingQuery);
-    } else {
-      const active = loadedMeetings.find((m) => m.isActive) || loadedMeetings[0];
-      if (active) {
-        setActiveMeetingId(active.id);
-      }
-    }
-
-    // Background Real-Time Cloud Synchronization (Automatic, Zero-Config)
     // 1. Initial snapshot fetch from cloud to keep this device completely fresh
     fetchFullDataFromCloud()
       .then((cloudData) => {
@@ -80,9 +110,19 @@ export default function App() {
           if (cloudData.meetings && cloudData.meetings.length > 0) {
             setMeetings(cloudData.meetings);
             saveStoredMeetings(cloudData.meetings, false);
+
+            setActiveMeetingId((prev) => {
+              if (prev && cloudData.meetings?.some((m) => m && m.id === prev)) {
+                return prev;
+              }
+              const active = cloudData.meetings?.find((m) => m && m.isActive) || cloudData.meetings?.[0];
+              return active?.id || prev;
+            });
           } else {
-            // If cloud is empty, seed cloud with local data so other devices can access it
-            uploadLocalDataToCloud(loadedMeetings, loadedAttendance, loadedSettings);
+            const currentMeetings = getStoredMeetings();
+            const currentAtt = getStoredAttendance();
+            const currentSett = getStoredSettings();
+            uploadLocalDataToCloud(currentMeetings, currentAtt, currentSett);
           }
 
           if (cloudData.attendance && cloudData.attendance.length > 0) {
@@ -157,15 +197,42 @@ export default function App() {
     }
   };
 
-  // Active meeting object
-  const currentMeeting = useMemo(() => {
-    return meetings.find((m) => m.id === activeMeetingId) || meetings[0] || {
+  // Active meeting object with bulletproof fallbacks against undefined/null
+  const currentMeeting: Meeting = useMemo(() => {
+    const valid = Array.isArray(meetings)
+      ? meetings.filter((m): m is Meeting => Boolean(m && typeof m === 'object' && m.id))
+      : [];
+
+    const found =
+      valid.find((m) => m.id === activeMeetingId) ||
+      valid.find((m) => m.isActive) ||
+      valid[0];
+
+    if (found) {
+      return {
+        ...found,
+        title: found.title || 'Rapat Presensi',
+        agenda: found.agenda || '',
+        date: found.date || new Date().toISOString().split('T')[0],
+        timeStart: found.timeStart || '09:00',
+        timeEnd: found.timeEnd || '12:00',
+        timezone: found.timezone || 'WIB',
+        location: found.location || 'Ruang Rapat / Zoom',
+        organizer: found.organizer || 'Direktorat Pelaksanaan Pembiayaan Infrastruktur Sumber Daya Air, Direktorat Jenderal Pembiayaan Infrastruktur Pekerjaan Umum',
+        leader: found.leader || 'Pimpinan Rapat',
+        allowedAttendanceMode: found.allowedAttendanceMode || 'hybrid',
+        showLeaderSignature: found.showLeaderSignature !== false
+      };
+    }
+
+    return {
       id: 'default',
       title: 'Rapat Koordinasi Pembiayaan Infrastruktur Sumber Daya Air',
       agenda: 'Koordinasi Penyelenggaraan Rapat',
       date: new Date().toISOString().split('T')[0],
       timeStart: '09:00',
       timeEnd: '12:00',
+      timezone: 'WIB',
       location: 'Ruang Rapat Utama Gd. Ditjen Pembiayaan Infrastruktur / Zoom',
       organizer: 'Direktorat Pelaksanaan Pembiayaan Infrastruktur Sumber Daya Air, Direktorat Jenderal Pembiayaan Infrastruktur Pekerjaan Umum',
       leader: 'Pimpinan Rapat',
@@ -176,11 +243,13 @@ export default function App() {
 
   // Attendance for active meeting
   const currentMeetingAttendance = useMemo(() => {
-    return attendance.filter((r) => r.meetingId === currentMeeting.id);
-  }, [attendance, currentMeeting.id]);
+    if (!Array.isArray(attendance)) return [];
+    const targetMeetingId = currentMeeting?.id || '';
+    return attendance.filter((r) => r && typeof r === 'object' && r.meetingId === targetMeetingId);
+  }, [attendance, currentMeeting?.id]);
 
-  const luringCount = currentMeetingAttendance.filter((r) => r.attendanceType === 'luring').length;
-  const daringCount = currentMeetingAttendance.filter((r) => r.attendanceType === 'daring').length;
+  const luringCount = currentMeetingAttendance.filter((r) => r?.attendanceType === 'luring').length;
+  const daringCount = currentMeetingAttendance.filter((r) => r?.attendanceType === 'daring').length;
 
   // Handler when participant submits attendance
   const handleAttendanceSubmit = (newRecord: AttendanceRecord) => {

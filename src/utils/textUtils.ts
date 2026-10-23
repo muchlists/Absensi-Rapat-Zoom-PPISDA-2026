@@ -9,8 +9,8 @@ export const OFFICIAL_ORGANIZER_TITLE_CASE =
  * Normalizes organizer name to Title Case instead of ALL-CAPS.
  * Preserves custom organizers while ensuring correct capitalization.
  */
-export function formatOrganizerName(organizer?: string): string {
-  if (!organizer || !organizer.trim()) {
+export function formatOrganizerName(organizer?: any): string {
+  if (!organizer || typeof organizer !== 'string' || !organizer.trim()) {
     return OFFICIAL_ORGANIZER_TITLE_CASE;
   }
 

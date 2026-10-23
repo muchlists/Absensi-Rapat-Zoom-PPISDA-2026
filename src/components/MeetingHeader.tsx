@@ -8,14 +8,23 @@ interface MeetingHeaderProps {
 }
 
 export const MeetingHeader: React.FC<MeetingHeaderProps> = ({ meeting }) => {
-  const formattedDate = new Date(meeting.date).toLocaleDateString('id-ID', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  });
+  const formattedDate = React.useMemo(() => {
+    try {
+      if (!meeting?.date) return '-';
+      const d = new Date(meeting.date);
+      if (isNaN(d.getTime())) return meeting.date;
+      return d.toLocaleDateString('id-ID', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+    } catch {
+      return meeting?.date || '-';
+    }
+  }, [meeting?.date]);
 
-  const organizerText = formatOrganizerName(meeting.organizer);
+  const organizerText = formatOrganizerName(meeting?.organizer);
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">

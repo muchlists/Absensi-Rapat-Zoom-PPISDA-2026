@@ -22,10 +22,15 @@ export function getStoredMeetings(): Meeting[] {
     if (data) {
       const parsed = JSON.parse(data);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed.map((m: Meeting) => ({
-          ...m,
-          organizer: formatOrganizerName(m.organizer)
-        }));
+        const valid = parsed
+          .filter((m): m is Meeting => Boolean(m && typeof m === 'object' && m.id && typeof m.id === 'string'))
+          .map((m: Meeting) => ({
+            ...m,
+            organizer: formatOrganizerName(m.organizer)
+          }));
+        if (valid.length > 0) {
+          return valid;
+        }
       }
     }
   } catch (err) {
