@@ -9,19 +9,21 @@ import {
 } from 'firebase/database';
 import { Meeting, AttendanceRecord, AdminSettings, FirebaseConfig } from '../types';
 
-// Built-in hardcoded Firebase Database URL (configured directly in code)
-export const BUILTIN_FIREBASE_DB_URL = 'https://absensi-ppisda-default-rtdb.asia-southeast1.firebasedatabase.app';
+// Built-in official Firebase Web App configuration
+export const BUILTIN_FIREBASE_CONFIG: FirebaseConfig = {
+  apiKey: "AIzaSyDhVmskbrYh-bRAHySfcEalq7COmwZhqKM",
+  authDomain: "absensi-ppisda.firebaseapp.com",
+  databaseURL: "https://absensi-ppisda-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "absensi-ppisda",
+  storageBucket: "absensi-ppisda.firebasestorage.app",
+  messagingSenderId: "366120721982",
+  appId: "1:366120721982:web:4a899468cc1f82a8473b6f"
+};
 
-// Allow optional override via environment variable if needed
-const ENV_DB_URL = (import.meta.env.VITE_FIREBASE_DATABASE_URL as string | undefined)?.trim();
+export const BUILTIN_FIREBASE_DB_URL = BUILTIN_FIREBASE_CONFIG.databaseURL;
 
 export function getStoredFirebaseConfig(): FirebaseConfig {
-  const dbUrl = ENV_DB_URL || BUILTIN_FIREBASE_DB_URL;
-  return {
-    databaseURL: sanitizeDatabaseUrl(dbUrl),
-    projectId: extractProjectIdFromUrl(dbUrl),
-    apiKey: 'ppisda-rtdb-key'
-  };
+  return BUILTIN_FIREBASE_CONFIG;
 }
 
 export function saveStoredFirebaseConfig(_config: FirebaseConfig | null): void {
@@ -36,22 +38,14 @@ function sanitizeDatabaseUrl(url: string): string {
 }
 
 function extractProjectIdFromUrl(url: string): string {
-  try {
-    const match = url.match(/https?:\/\/([^.]+)/);
-    if (match && match[1]) {
-      return match[1].replace(/-default-rtdb$/, '');
-    }
-  } catch {
-    // ignore
-  }
-  return 'absensi-ppisda';
+  return BUILTIN_FIREBASE_CONFIG.projectId || 'absensi-ppisda';
 }
 
 let activeApp: FirebaseApp | null = null;
 let activeDb: Database | null = null;
 
 export function initFirebase(_customConfig?: FirebaseConfig | null): Database | null {
-  const config = getStoredFirebaseConfig();
+  const config = BUILTIN_FIREBASE_CONFIG;
 
   try {
     const appName = 'ppisda-firebase-app';
@@ -61,17 +55,10 @@ export function initFirebase(_customConfig?: FirebaseConfig | null): Database | 
     if (existing) {
       activeApp = existing;
     } else {
-      activeApp = initializeApp(
-        {
-          databaseURL: sanitizeDatabaseUrl(config.databaseURL),
-          projectId: config.projectId || extractProjectIdFromUrl(config.databaseURL),
-          apiKey: config.apiKey || 'ppisda-rtdb-key'
-        },
-        appName
-      );
+      activeApp = initializeApp(config, appName);
     }
 
-    activeDb = getDatabase(activeApp, sanitizeDatabaseUrl(config.databaseURL));
+    activeDb = getDatabase(activeApp, config.databaseURL);
     return activeDb;
   } catch (err) {
     console.error('Failed to initialize Firebase', err);
