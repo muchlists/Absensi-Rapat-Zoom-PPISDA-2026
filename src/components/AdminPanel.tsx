@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Download,
   FileSpreadsheet,
@@ -103,6 +103,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [tempAddress, setTempAddress] = useState(settings.address);
   const [settingsSavedMessage, setSettingsSavedMessage] = useState(false);
 
+  // Ensure selectedMeetingId stays valid if meetings change
+  useEffect(() => {
+    if (meetings.length > 0 && !meetings.some((m) => m && m.id === selectedMeetingId)) {
+      const fallback = meetings.find((m) => m && m.isActive) || meetings[0];
+      if (fallback) {
+        setSelectedMeetingId(fallback.id);
+      }
+    }
+  }, [meetings, selectedMeetingId]);
+
   // The meeting currently inspected in admin
   const activeAdminMeeting = useMemo(() => {
     const valid = Array.isArray(meetings)
@@ -196,16 +206,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       return;
     }
 
-    const updatedMeetings = meetings.filter((m) => m.id !== meetingToDelete.id);
+    const remaining = meetings.filter((m) => m.id !== meetingToDelete.id);
+    let updatedMeetings = remaining.map((m) => ({ ...m }));
 
     // If the meeting being deleted was the active meeting, activate another meeting
-    if (meetingToDelete.isActive) {
-      updatedMeetings[0].isActive = true;
+    if (meetingToDelete.isActive && updatedMeetings.length > 0) {
+      updatedMeetings = updatedMeetings.map((m, idx) => ({
+        ...m,
+        isActive: idx === 0
+      }));
       onSelectMeeting(updatedMeetings[0].id);
       setSelectedMeetingId(updatedMeetings[0].id);
-    } else if (selectedMeetingId === meetingToDelete.id) {
+    } else if (selectedMeetingId === meetingToDelete.id && updatedMeetings.length > 0) {
       const fallbackId = updatedMeetings.find((m) => m.isActive)?.id || updatedMeetings[0].id;
       setSelectedMeetingId(fallbackId);
+      onSelectMeeting(fallbackId);
     }
 
     // Also remove any attendance records associated with this meeting
@@ -267,7 +282,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   // Create new meeting
   const handleCreateMeeting = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTitle.trim()) return;
+    if (!newTitle.trim()) {
+      alert('Judul rapat wajib diisi.');
+      return;
+    }
 
     const newMeeting: Meeting = {
       id: `meet-${Date.now()}`,
@@ -281,6 +299,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       organizer: newOrganizer.trim(),
       leader: newLeader.trim(),
       leaderNip: newLeaderNip.trim(),
+      notetaker: '',
       allowedAttendanceMode: newAllowedMode,
       showLeaderSignature: newShowLeaderSignature,
       signLocation: newSignLocation.trim() || 'Jakarta',
@@ -295,6 +314,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     onSelectMeeting(newMeeting.id);
     setSelectedMeetingId(newMeeting.id);
     setShowNewMeetingModal(false);
+
+    // Reset inputs
+    setNewTitle('');
+    setNewAgenda('');
   };
 
   // Save edited meeting
@@ -302,8 +325,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     e.preventDefault();
     if (!editingMeeting) return;
 
+    const cleanedEditing: Meeting = {
+      ...editingMeeting,
+      title: editingMeeting.title.trim(),
+      agenda: (editingMeeting.agenda || '').trim(),
+      location: (editingMeeting.location || '').trim(),
+      leader: (editingMeeting.leader || '').trim(),
+      leaderNip: (editingMeeting.leaderNip || '').trim(),
+      notetaker: (editingMeeting.notetaker || '').trim(),
+      signLocation: (editingMeeting.signLocation || 'Jakarta').trim()
+    };
+
     const updatedMeetings = meetings.map((m) =>
-      m.id === editingMeeting.id ? editingMeeting : m
+      m.id === cleanedEditing.id ? cleanedEditing : m
     );
     onUpdateMeetings(updatedMeetings);
     setEditingMeeting(null);

@@ -36,7 +36,7 @@ export function getStoredMeetings(): Meeting[] {
   } catch (err) {
     console.error('Error loading meetings from storage', err);
   }
-  saveStoredMeetings(INITIAL_MEETINGS);
+  saveStoredMeetings(INITIAL_MEETINGS, false);
   return INITIAL_MEETINGS;
 }
 
@@ -104,7 +104,7 @@ export function getStoredSettings(): AdminSettings {
   } catch (err) {
     console.error('Error loading settings from storage', err);
   }
-  saveStoredSettings(INITIAL_SETTINGS);
+  saveStoredSettings(INITIAL_SETTINGS, false);
   return INITIAL_SETTINGS;
 }
 
@@ -126,12 +126,12 @@ export function resetToDefaultData(): { meetings: Meeting[]; attendance: Attenda
 
   const seeded = INITIAL_ATTENDANCE.map((record, index) => ({
     ...record,
-    signature: createMockSignatureSvg(record.fullName, (index % 4) + 1)
+    signature: record.signature || createMockSignatureSvg(record.fullName, (index % 4) + 1)
   }));
 
-  saveStoredMeetings(INITIAL_MEETINGS);
-  saveStoredAttendance(seeded);
-  saveStoredSettings(INITIAL_SETTINGS);
+  saveStoredMeetings(INITIAL_MEETINGS, false);
+  saveStoredAttendance(seeded, false);
+  saveStoredSettings(INITIAL_SETTINGS, false);
 
   return {
     meetings: INITIAL_MEETINGS,

@@ -113,15 +113,54 @@ export async function testFirebaseConnection(config: FirebaseConfig): Promise<{ 
 }
 
 // -------------------------------------------------------------
-// Helper: Deduplicate Attendance Records by ID
+// Helpers: Data Cleaning & Deduplication (Zero Undefined for Firebase)
 // -------------------------------------------------------------
+export function cleanMeeting(m: any): Meeting {
+  return {
+    id: String(m?.id || `meet-${Date.now()}`),
+    title: String(m?.title || '').trim(),
+    agenda: String(m?.agenda || '').trim(),
+    date: String(m?.date || new Date().toISOString().split('T')[0]),
+    timeStart: String(m?.timeStart || '09:00'),
+    timeEnd: String(m?.timeEnd || '12:00'),
+    timezone: (m?.timezone || 'WIB') as any,
+    location: String(m?.location || '').trim(),
+    organizer: String(m?.organizer || 'Direktorat Pelaksanaan Pembiayaan Infrastruktur Sumber Daya Air, Direktorat Jenderal Pembiayaan Infrastruktur Pekerjaan Umum').trim(),
+    leader: String(m?.leader || 'Pimpinan Rapat').trim(),
+    leaderNip: String(m?.leaderNip || '').trim(),
+    notetaker: String(m?.notetaker || '').trim(),
+    allowedAttendanceMode: (m?.allowedAttendanceMode || 'hybrid') as any,
+    showLeaderSignature: m?.showLeaderSignature !== false,
+    signLocation: String(m?.signLocation || 'Jakarta').trim(),
+    isActive: Boolean(m?.isActive),
+    createdAt: String(m?.createdAt || new Date().toISOString())
+  };
+}
+
+export function cleanAttendanceRecord(r: any): AttendanceRecord {
+  return {
+    id: String(r?.id || `att-${Date.now()}`),
+    meetingId: String(r?.meetingId || ''),
+    fullName: String(r?.fullName || '').trim(),
+    nip: String(r?.nip || '-').trim(),
+    institution: String(r?.institution || '').trim(),
+    position: String(r?.position || 'Peserta Rapat').trim(),
+    phone: String(r?.phone || '-').trim(),
+    email: String(r?.email || '-').trim(),
+    attendanceType: (r?.attendanceType === 'daring' ? 'daring' : 'luring'),
+    signature: String(r?.signature || ''),
+    notes: String(r?.notes || '').trim(),
+    timestamp: String(r?.timestamp || new Date().toISOString())
+  };
+}
+
 export function deduplicateAttendance(records: any[]): AttendanceRecord[] {
   if (!Array.isArray(records)) return [];
   const map = new Map<string, AttendanceRecord>();
   for (const item of records) {
     if (item && typeof item === 'object' && item.id) {
       if (!map.has(item.id)) {
-        map.set(item.id, item as AttendanceRecord);
+        map.set(item.id, cleanAttendanceRecord(item));
       }
     }
   }
@@ -149,7 +188,9 @@ export function subscribeToMeetings(callback: (meetings: Meeting[]) => void): ()
           } else if (typeof val === 'object' && val !== null) {
             list = Object.values(val);
           }
-          const valid = list.filter((m) => m && typeof m === 'object' && m.id);
+          const valid = list
+            .filter((m) => m && typeof m === 'object' && m.id)
+            .map(cleanMeeting);
           if (valid.length > 0) {
             callback(valid);
           }
@@ -235,35 +276,45 @@ export async function saveMeetingsToCloud(meetings: Meeting[]): Promise<boolean>
   const config = getStoredFirebaseConfig();
   if (!config) return false;
 
-  const db = activeDb || initFirebase(config);
-  if (db) {
-    try {
-      await set(ref(db, 'ppisda/meetings'), meetings);
-      return true;
-    } catch (err) {
-      console.warn('Firebase SDK set meetings failed, trying REST fallback', err);
-    }
-  }
+  const cleaned = JSON.parse(JSON.stringify(meetings.map(cleanMeeting)));
 
-  // Fallback to direct REST PUT
+  // Try direct REST PUT first (atomic and never throws SDK serialization errors)
   try {
     const res = await fetch(`${sanitizeDatabaseUrl(config.databaseURL)}/ppisda/meetings.json`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(meetings)
+      body: JSON.stringify(cleaned)
     });
-    return res.ok;
+    if (res.ok) {
+      // Also update SDK cache in background
+      const db = activeDb || initFirebase(config);
+      if (db) {
+        set(ref(db, 'ppisda/meetings'), cleaned).catch(() => {});
+      }
+      return true;
+    }
   } catch (err) {
-    console.error('REST fallback saveMeetingsToCloud failed', err);
-    return false;
+    console.warn('REST saveMeetingsToCloud failed, trying SDK fallback', err);
   }
+
+  const db = activeDb || initFirebase(config);
+  if (db) {
+    try {
+      await set(ref(db, 'ppisda/meetings'), cleaned);
+      return true;
+    } catch (err) {
+      console.error('Firebase SDK set meetings failed', err);
+    }
+  }
+
+  return false;
 }
 
 export async function saveAttendanceToCloud(attendance: AttendanceRecord[]): Promise<boolean> {
   const config = getStoredFirebaseConfig();
   if (!config) return false;
 
-  const deduped = deduplicateAttendance(attendance);
+  const deduped = deduplicateAttendance(attendance).map(cleanAttendanceRecord);
   const dict = deduped.reduce<Record<string, AttendanceRecord>>((acc, item) => {
     if (item && item.id) {
       acc[item.id] = item;
@@ -271,86 +322,111 @@ export async function saveAttendanceToCloud(attendance: AttendanceRecord[]): Pro
     return acc;
   }, {});
 
-  const db = activeDb || initFirebase(config);
-  if (db) {
-    try {
-      await set(ref(db, 'ppisda/attendance'), dict);
-      return true;
-    } catch (err) {
-      console.warn('Firebase SDK set attendance failed, trying REST fallback', err);
-    }
-  }
+  const cleanedDict = JSON.parse(JSON.stringify(dict));
 
   try {
     const res = await fetch(`${sanitizeDatabaseUrl(config.databaseURL)}/ppisda/attendance.json`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(dict)
+      body: JSON.stringify(cleanedDict)
     });
-    return res.ok;
+    if (res.ok) {
+      const db = activeDb || initFirebase(config);
+      if (db) {
+        set(ref(db, 'ppisda/attendance'), cleanedDict).catch(() => {});
+      }
+      return true;
+    }
   } catch (err) {
-    console.error('REST fallback saveAttendanceToCloud failed', err);
-    return false;
+    console.warn('REST saveAttendanceToCloud failed, trying SDK fallback', err);
   }
+
+  const db = activeDb || initFirebase(config);
+  if (db) {
+    try {
+      await set(ref(db, 'ppisda/attendance'), cleanedDict);
+      return true;
+    } catch (err) {
+      console.error('Firebase SDK set attendance failed', err);
+    }
+  }
+
+  return false;
 }
 
 export async function addAttendanceRecordToCloud(record: AttendanceRecord): Promise<boolean> {
   const config = getStoredFirebaseConfig();
   if (!config) return false;
 
-  const db = activeDb || initFirebase(config);
-
-  if (db) {
-    try {
-      // Use record ID as key to guarantee idempotency and avoid race duplicates
-      await set(ref(db, `ppisda/attendance/${record.id}`), record);
-      return true;
-    } catch (err) {
-      console.warn('Firebase SDK addAttendanceRecordToCloud failed, trying REST', err);
-    }
-  }
+  const cleaned = JSON.parse(JSON.stringify(cleanAttendanceRecord(record)));
 
   try {
     const res = await fetch(
-      `${sanitizeDatabaseUrl(config.databaseURL)}/ppisda/attendance/${record.id}.json`,
+      `${sanitizeDatabaseUrl(config.databaseURL)}/ppisda/attendance/${cleaned.id}.json`,
       {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(record)
+        body: JSON.stringify(cleaned)
       }
     );
-    return res.ok;
+    if (res.ok) {
+      const db = activeDb || initFirebase(config);
+      if (db) {
+        set(ref(db, `ppisda/attendance/${cleaned.id}`), cleaned).catch(() => {});
+      }
+      return true;
+    }
   } catch (err) {
-    console.error('REST fallback addAttendanceRecordToCloud failed', err);
-    return false;
+    console.warn('REST addAttendanceRecordToCloud failed, trying SDK fallback', err);
   }
+
+  const db = activeDb || initFirebase(config);
+  if (db) {
+    try {
+      await set(ref(db, `ppisda/attendance/${cleaned.id}`), cleaned);
+      return true;
+    } catch (err) {
+      console.error('Firebase SDK addAttendanceRecordToCloud failed', err);
+    }
+  }
+
+  return false;
 }
 
 export async function saveSettingsToCloud(settings: AdminSettings): Promise<boolean> {
   const config = getStoredFirebaseConfig();
   if (!config) return false;
 
-  const db = activeDb || initFirebase(config);
-  if (db) {
-    try {
-      await set(ref(db, 'ppisda/settings'), settings);
-      return true;
-    } catch (err) {
-      console.warn('Firebase SDK set settings failed, trying REST fallback', err);
-    }
-  }
+  const cleaned = JSON.parse(JSON.stringify(settings));
 
   try {
     const res = await fetch(`${sanitizeDatabaseUrl(config.databaseURL)}/ppisda/settings.json`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(settings)
+      body: JSON.stringify(cleaned)
     });
-    return res.ok;
+    if (res.ok) {
+      const db = activeDb || initFirebase(config);
+      if (db) {
+        set(ref(db, 'ppisda/settings'), cleaned).catch(() => {});
+      }
+      return true;
+    }
   } catch (err) {
-    console.error('REST fallback saveSettingsToCloud failed', err);
-    return false;
+    console.warn('REST saveSettingsToCloud failed, trying SDK fallback', err);
   }
+
+  const db = activeDb || initFirebase(config);
+  if (db) {
+    try {
+      await set(ref(db, 'ppisda/settings'), cleaned);
+      return true;
+    } catch (err) {
+      console.error('Firebase SDK set settings failed', err);
+    }
+  }
+
+  return false;
 }
 
 export async function uploadLocalDataToCloud(
@@ -364,17 +440,19 @@ export async function uploadLocalDataToCloud(
   }
 
   try {
-    const payload = {
-      meetings,
-      attendance: Array.isArray(attendance)
-        ? attendance.reduce<Record<string, AttendanceRecord>>((acc, item) => {
-            acc[item.id] = item;
-            return acc;
-          }, {})
-        : attendance,
+    const cleanMeetingsList = meetings.map(cleanMeeting);
+    const cleanAttList = deduplicateAttendance(attendance).map(cleanAttendanceRecord);
+    const attDict = cleanAttList.reduce<Record<string, AttendanceRecord>>((acc, item) => {
+      acc[item.id] = item;
+      return acc;
+    }, {});
+
+    const payload = JSON.parse(JSON.stringify({
+      meetings: cleanMeetingsList,
+      attendance: attDict,
       settings,
       lastUploadedAt: new Date().toISOString()
-    };
+    }));
 
     const res = await fetch(`${sanitizeDatabaseUrl(config.databaseURL)}/ppisda.json`, {
       method: 'PATCH',
@@ -413,14 +491,16 @@ export async function fetchFullDataFromCloud(): Promise<{
     let parsedMeetings: Meeting[] | undefined;
     if (data.meetings) {
       const rawList = Array.isArray(data.meetings) ? data.meetings : Object.values(data.meetings);
-      const cleaned = rawList.filter((m: any) => m && typeof m === 'object' && m.id);
+      const cleaned = rawList
+        .filter((m: any) => m && typeof m === 'object' && m.id)
+        .map(cleanMeeting);
       parsedMeetings = cleaned.length > 0 ? (cleaned as Meeting[]) : undefined;
     }
 
     let parsedAttendance: AttendanceRecord[] | undefined;
     if (data.attendance) {
       const rawList = Array.isArray(data.attendance) ? data.attendance : Object.values(data.attendance);
-      parsedAttendance = deduplicateAttendance(rawList);
+      parsedAttendance = deduplicateAttendance(rawList).map(cleanAttendanceRecord);
       // If duplicates existed in raw database, rewrite cleanly to heal the database
       if (rawList.length > parsedAttendance.length) {
         saveAttendanceToCloud(parsedAttendance).catch(() => {});
