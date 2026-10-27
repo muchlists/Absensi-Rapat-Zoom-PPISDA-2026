@@ -16,18 +16,50 @@ const STORAGE_KEYS = {
   ACTIVE_MEETING: 'ppisda_active_meeting_v4'
 };
 
+/**
+ * Returns the active meeting, or the latest meeting created by createdAt date
+ */
+export function getActiveOrLatestMeeting(meetingsList: Meeting[]): Meeting | undefined {
+  if (!Array.isArray(meetingsList) || meetingsList.length === 0) return undefined;
+  const valid = meetingsList.filter((m) => m && typeof m === 'object' && m.id);
+  if (valid.length === 0) return undefined;
+
+  // 1. First priority: The meeting explicitly set to isActive
+  const active = valid.find((m) => m.isActive);
+  if (active) return active;
+
+  // 2. Second priority: The newest meeting created based on createdAt date
+  const sorted = [...valid].sort((a, b) => {
+    const tA = new Date(a.createdAt || 0).getTime();
+    const tB = new Date(b.createdAt || 0).getTime();
+    return tB - tA;
+  });
+  return sorted[0];
+}
+
 export function getStoredMeetings(): Meeting[] {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.MEETINGS);
     if (data) {
       const parsed = JSON.parse(data);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        const valid = parsed
+        let valid = parsed
           .filter((m): m is Meeting => Boolean(m && typeof m === 'object' && m.id && typeof m.id === 'string'))
           .map((m: Meeting) => ({
             ...m,
             organizer: formatOrganizerName(m.organizer)
           }));
+
+        // Ensure user's permanent meeting is merged if not present
+        const hasUserMeeting = valid.some((m) => m.id === 'meet-1792664134359');
+        if (!hasUserMeeting) {
+          const userMeet = INITIAL_MEETINGS.find((m) => m.id === 'meet-1792664134359');
+          if (userMeet) {
+            valid = [userMeet, ...valid.map((m) => ({ ...m, isActive: false }))];
+            saveStoredMeetings(valid, false);
+          }
+        }
+
         if (valid.length > 0) {
           return valid;
         }

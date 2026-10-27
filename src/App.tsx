@@ -17,7 +17,8 @@ import {
   saveStoredAttendance,
   getStoredSettings,
   saveStoredSettings,
-  resetToDefaultData
+  resetToDefaultData,
+  getActiveOrLatestMeeting
 } from './utils/storage';
 import {
   subscribeToMeetings,
@@ -73,12 +74,9 @@ export default function App() {
       if (meetingQuery && loaded.some((m) => m && m.id === meetingQuery)) {
         return meetingQuery;
       }
-      const savedActive = localStorage.getItem('ppisda_active_meeting_v4');
-      if (savedActive && loaded.some((m) => m && m.id === savedActive)) {
-        return savedActive;
-      }
-      const active = loaded.find((m) => m && m.isActive) || loaded[0];
-      return active?.id || '';
+      // Always default to the active meeting, or the latest meeting created
+      const activeOrLatest = getActiveOrLatestMeeting(loaded);
+      return activeOrLatest?.id || '';
     } catch {
       return '';
     }
@@ -111,13 +109,16 @@ export default function App() {
             setMeetings(cloudData.meetings);
             saveStoredMeetings(cloudData.meetings, false);
 
-            setActiveMeetingId((prev) => {
-              if (prev && cloudData.meetings?.some((m) => m && m.id === prev)) {
-                return prev;
+            const params = new URLSearchParams(window.location.search);
+            const meetingQuery = params.get('meeting');
+            if (meetingQuery && cloudData.meetings.some((m) => m && m.id === meetingQuery)) {
+              setActiveMeetingId(meetingQuery);
+            } else {
+              const activeOrLatest = getActiveOrLatestMeeting(cloudData.meetings);
+              if (activeOrLatest) {
+                setActiveMeetingId(activeOrLatest.id);
               }
-              const active = cloudData.meetings?.find((m) => m && m.isActive) || cloudData.meetings?.[0];
-              return active?.id || prev;
-            });
+            }
           } else {
             const currentMeetings = getStoredMeetings();
             const currentAtt = getStoredAttendance();
@@ -145,6 +146,15 @@ export default function App() {
       if (remoteMeetings && remoteMeetings.length > 0) {
         setMeetings(remoteMeetings);
         saveStoredMeetings(remoteMeetings, false);
+
+        const params = new URLSearchParams(window.location.search);
+        const meetingQuery = params.get('meeting');
+        if (!meetingQuery) {
+          const activeOrLatest = getActiveOrLatestMeeting(remoteMeetings);
+          if (activeOrLatest) {
+            setActiveMeetingId(activeOrLatest.id);
+          }
+        }
       }
     });
 
@@ -203,9 +213,11 @@ export default function App() {
       ? meetings.filter((m): m is Meeting => Boolean(m && typeof m === 'object' && m.id))
       : [];
 
+    const activeOrLatest = getActiveOrLatestMeeting(valid);
+
     const found =
-      valid.find((m) => m.id === activeMeetingId) ||
-      valid.find((m) => m.isActive) ||
+      (activeMeetingId ? valid.find((m) => m.id === activeMeetingId) : null) ||
+      activeOrLatest ||
       valid[0];
 
     if (found) {
